@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
   <!-- ============================================================
-       HERO SECTION
+      HERO SECTION
   ============================================================ -->
   <section id="hero" class="relative min-h-screen bg-hero-gradient flex items-center overflow-hidden hero-noise grid-bg">
 
@@ -116,7 +116,7 @@
 
 
   <!-- ============================================================
-       TRUST BADGES / SOCIAL PROOF
+      TRUST BADGES / SOCIAL PROOF
   ============================================================ -->
   <section id="trust" class="bg-white py-16 lg:py-20 overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
@@ -216,7 +216,7 @@
 
 
   <!-- ============================================================
-       WHY US — 3 PILLARS
+      WHY US — 3 PILLARS
   ============================================================ -->
   <section id="kenapa-kami" class="bg-[#F8F9FA] py-20 lg:py-28 overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
@@ -323,7 +323,7 @@
 
 
   <!-- ============================================================
-       PRODUCT SHOWCASE / PRICING CARDS
+      PRODUCT SHOWCASE / PRICING CARDS
   ============================================================ -->
   <section id="produk" class="bg-[#0A2540] py-20 lg:py-28 relative overflow-hidden">
 
@@ -441,7 +441,7 @@
 
 
   <!-- ============================================================
-       HOW IT WORKS
+      HOW IT WORKS
   ============================================================ -->
   <section id="cara-kerja" class="bg-[#F8F9FA] py-20 lg:py-28">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
@@ -526,7 +526,7 @@
 
 
   <!-- ============================================================
-       TESTIMONIALS / MINI REVIEW STRIP
+      TESTIMONIALS / MINI REVIEW STRIP
   ============================================================ -->
   <section class="bg-white py-16 lg:py-20 overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
@@ -592,7 +592,7 @@
 
 
   <!-- ============================================================
-       CONTACT / CTA FINAL SECTION
+      CONTACT / CTA FINAL SECTION
   ============================================================ -->
   <section id="kontak" class="bg-[#0A2540] py-20 lg:py-28 relative overflow-hidden">
 
@@ -652,7 +652,5 @@
       </div>
     </div>
   </section>
-
-
 
 @endsection
