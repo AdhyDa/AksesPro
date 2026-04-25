@@ -36,10 +36,16 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $points = 0;
+        if (str_ends_with(strtolower($request->email), '.ac.id')) {
+            $points = 100;
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'points' => $points,
         ]);
 
         event(new Registered($user));

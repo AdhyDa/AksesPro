@@ -370,7 +370,7 @@
           buyBtnClasses="btn-primary"
         >
           <x-slot:icon>
-            <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-.459 17.564c-1.098 0-2.025-.384-2.781-1.152-.756-.768-1.134-1.739-1.134-2.913 0-1.188.384-2.163 1.152-2.925.768-.762 1.749-1.143 2.943-1.143 1.056 0 1.959.309 2.709.927l-.756 1.107c-.576-.468-1.179-.702-1.809-.702-.72 0-1.32.258-1.8.774-.48.516-.72 1.161-.72 1.935 0 .786.243 1.437.729 1.953.486.516 1.095.774 1.827.774.558 0 1.176-.189 1.854-.567v-1.296h-1.512v-1.269h2.952v3.213c-.918.723-1.908 1.284-2.654 1.284z"/></svg>
+            <img src="{{ asset('image/canva.jpg') }}" alt="Canva Pro" class="w-full h-full object-cover rounded-2xl" />
           </x-slot:icon>
         </x-product-card>
 
@@ -396,7 +396,7 @@
           buyBtnClasses="btn-primary glow-cyan"
         >
           <x-slot:icon>
-            <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            <img src="{{ asset('image/spotify.jpg') }}" alt="Spotify Premium" class="w-full h-full object-cover rounded-2xl" />
           </x-slot:icon>
         </x-product-card>
 
@@ -420,7 +420,7 @@
           buyBtnClasses="bg-red-600 hover:bg-red-500 text-white transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5"
         >
           <x-slot:icon>
-            <span class="text-white font-black text-2xl" style="font-family: 'Arial Black', sans-serif; letter-spacing: -2px;">N</span>
+            <img src="{{ asset('image/netflix.jpg') }}" alt="Netflix Premium" class="w-full h-full object-cover rounded-2xl" />
           </x-slot:icon>
           <x-slot:bgGlow>
             <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse at bottom left, rgba(220,38,38,0.1) 0%, transparent 60%);"></div>
