@@ -25,8 +25,15 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::hasColumn('users', 'points')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn(['points', 'google_id', 'google_token', 'google_refresh_token']);
+            });
+        }
+
+        \Illuminate\Support\Facades\DB::table('users')->whereNull('password')->update(['password' => '']);
+
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['points', 'google_id', 'google_token', 'google_refresh_token']);
             $table->string('password')->nullable(false)->change();
         });
     }

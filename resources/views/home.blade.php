@@ -32,7 +32,7 @@
         </p>
 
         <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-6">
           <a href="#produk" id="hero-cta-primary"
             class="btn-primary px-8 py-4 rounded-2xl text-base font-bold inline-flex items-center justify-center gap-2.5">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
@@ -46,7 +46,7 @@
         </div>
 
         <!-- Stats Row -->
-        <div class="flex items-center justify-center lg:justify-start gap-3 sm:gap-4">
+        <div class="flex items-center justify-center lg:justify-start gap-3 sm:gap-4 pb-6">
           <div class="text-center rounded-2xl px-5 py-3" style="background: rgba(10,37,64,0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15);">
             <div class="text-2xl font-bold text-white">500+</div>
             <div class="text-white/70 text-xs mt-0.5">Pelanggan Aktif</div>
@@ -104,13 +104,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Bottom wave -->
-    <div class="absolute bottom-0 left-0 right-0">
-      <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-auto">
-        <path d="M0 80L1440 80L1440 20C1200 60 960 0 720 20C480 40 240 60 0 20L0 80Z" fill="white"/>
-      </svg>
     </div>
   </section>
 
