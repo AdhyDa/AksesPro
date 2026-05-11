@@ -19,4 +19,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\AdminDashboardController;
+
+Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+Route::get('/user/katalog', [UserDashboardController::class, 'katalog'])->name('user.katalog');
+Route::get('/user/langganan', [UserDashboardController::class, 'langganan'])->name('user.langganan');
+Route::get('/user/transaksi', [UserDashboardController::class, 'transaksi'])->name('user.transaksi');
+Route::get('/user/poin', [UserDashboardController::class, 'poin'])->name('user.poin');
+Route::get('/user/bantuan', [UserDashboardController::class, 'bantuan'])->name('user.bantuan');
+
+Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
 require __DIR__.'/auth.php';
