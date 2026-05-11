@@ -30,5 +30,10 @@ Route::get('/user/poin', [UserDashboardController::class, 'poin'])->name('user.p
 Route::get('/user/bantuan', [UserDashboardController::class, 'bantuan'])->name('user.bantuan');
 
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+Route::get('/admin/produk', [AdminDashboardController::class, 'produk'])->name('admin.produk');
+Route::get('/admin/transaksi', [AdminDashboardController::class, 'transaksi'])->name('admin.transaksi');
+Route::get('/admin/pengguna', [AdminDashboardController::class, 'pengguna'])->name('admin.pengguna');
+Route::get('/admin/laporan', [AdminDashboardController::class, 'laporan'])->name('admin.laporan');
+Route::get('/admin/pengaturan', [AdminDashboardController::class, 'pengaturan'])->name('admin.pengaturan');
 
 require __DIR__.'/auth.php';
