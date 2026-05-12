@@ -8,24 +8,53 @@ class UserDashboardController extends Controller
 {
     public function index()
     {
-        // Dummy data for User Dashboard
+        // For development/demonstration, we fetch the first member user if not authenticated
+        $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
+        
         $user = [
-            'name' => 'Adhy',
-            'points' => 100,
+            'name' => $userModel->name,
+            'points' => $userModel->points,
         ];
+
+        $activeSubscriptions = \App\Models\UserSubscription::where('user_id', $userModel->id)
+            ->where('status', 'active')
+            ->count();
+
+        $totalTransactions = \App\Models\Transaction::where('user_id', $userModel->id)
+            ->where('status', 'success')
+            ->count();
+
+        // Calculate Estimated Savings
+        $estimatedSavings = 0;
+        $userSubs = \App\Models\UserSubscription::with('product')
+            ->where('user_id', $userModel->id)
+            ->get();
+            
+        foreach ($userSubs as $sub) {
+            $estimatedSavings += ($sub->product->original_price - $sub->product->aksespro_price);
+        }
 
         $stats = [
-            'active_subscriptions' => 3,
-            'total_transactions' => 12,
-            'points_collected' => 350,
-            'estimated_savings' => 'Rp 450.000',
+            'active_subscriptions' => $activeSubscriptions,
+            'total_transactions' => $totalTransactions,
+            'points_collected' => $userModel->points,
+            'estimated_savings' => 'Rp ' . number_format($estimatedSavings, 0, ',', '.'),
         ];
 
-        $subscriptions = [
-            ['name' => 'Netflix Premium', 'package' => '1 Bulan', 'end_date' => '2026-06-15', 'status' => 'Aktif'],
-            ['name' => 'Spotify Family', 'package' => '3 Bulan', 'end_date' => '2026-08-01', 'status' => 'Aktif'],
-            ['name' => 'Canva Pro', 'package' => '1 Tahun', 'end_date' => '2027-01-10', 'status' => 'Mendekati Kedaluwarsa'],
-        ];
+        $activeSubsData = \App\Models\UserSubscription::with('product')
+            ->where('user_id', $userModel->id)
+            ->where('status', 'active')
+            ->get();
+
+        $subscriptions = [];
+        foreach ($activeSubsData as $sub) {
+            $subscriptions[] = [
+                'name' => $sub->product->name,
+                'package' => $sub->product->duration_days . ' Hari',
+                'end_date' => $sub->end_date->format('Y-m-d'),
+                'status' => 'Aktif', // we filter by active anyway
+            ];
+        }
 
         return view('user.dashboard', compact('user', 'stats', 'subscriptions'));
     }

@@ -184,10 +184,10 @@
             const revenueChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                    labels: {!! json_encode(array_reverse($chartLabels)) !!},
                     datasets: [{
                         label: 'Pendapatan (Juta Rupiah)',
-                        data: [12.5, 15.2, 28.4, 22.1, 35.6, 29.8],
+                        data: {!! json_encode(array_reverse($chartData)) !!},
                         borderColor: '#0A2540', // Tech Navy Blue
                         backgroundColor: gradient,
                         borderWidth: 2,
@@ -223,14 +223,12 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 40,
                             grid: {
                                 color: '#f3f4f6', // Light gray grid lines
                                 drawBorder: false,
                             },
                             ticks: {
                                 color: '#9ca3af', // Gray text
-                                stepSize: 10
                             }
                         },
                         x: {

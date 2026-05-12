@@ -8,31 +8,74 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // Dummy data for Admin Dashboard
+        $adminModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'admin')->first();
+        
         $admin = [
-            'name' => 'Admin Utama',
+            'name' => $adminModel ? $adminModel->name : 'Superadmin',
         ];
+
+        $currentMonth = now()->month;
+
+        $monthlyRevenue = \App\Models\Transaction::where('status', 'success')
+            ->whereMonth('created_at', $currentMonth)
+            ->sum('total_amount');
+
+        $totalUsers = \App\Models\User::where('role', 'member')->count();
+
+        $successfulOrders = \App\Models\Transaction::where('status', 'success')->count();
+
+        $complaintTickets = \App\Models\Ticket::where('status', 'open')->count();
 
         $stats = [
-            'monthly_revenue' => 'Rp 15.450.000',
-            'revenue_trend' => '+12.5%',
-            'total_users' => 1245,
-            'users_trend' => '+45',
-            'successful_orders' => 384,
-            'orders_trend' => '+8.2%',
-            'complaint_tickets' => 5,
-            'tickets_trend' => '-2',
+            'monthly_revenue' => 'Rp ' . number_format($monthlyRevenue, 0, ',', '.'),
+            'revenue_trend' => '+0%', // Can be calculated based on last month
+            'total_users' => $totalUsers,
+            'users_trend' => '+0',
+            'successful_orders' => $successfulOrders,
+            'orders_trend' => '+0%',
+            'complaint_tickets' => $complaintTickets,
+            'tickets_trend' => '-0',
         ];
 
-        $recent_transactions = [
-            ['user' => 'Budi Santoso', 'product' => 'Netflix Premium 1 Bulan', 'total' => 'Rp 35.000', 'payment' => 'QRIS', 'status' => 'Sukses'],
-            ['user' => 'Siti Aminah', 'product' => 'Canva Pro 1 Tahun', 'total' => 'Rp 150.000', 'payment' => 'Gopay', 'status' => 'Sukses'],
-            ['user' => 'Andi Wijaya', 'product' => 'Spotify Family 3 Bulan', 'total' => 'Rp 85.000', 'payment' => 'Transfer Bank', 'status' => 'Menunggu'],
-            ['user' => 'Rina Melati', 'product' => 'Zoom Pro 1 Bulan', 'total' => 'Rp 45.000', 'payment' => 'OVO', 'status' => 'Sukses'],
-            ['user' => 'Dedi Kurniawan', 'product' => 'Netflix Premium 1 Bulan', 'total' => 'Rp 35.000', 'payment' => 'QRIS', 'status' => 'Gagal'],
-        ];
+        $recentTransactionsData = \App\Models\Transaction::with(['user', 'product'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
-        return view('admin.dashboard', compact('admin', 'stats', 'recent_transactions'));
+        $recent_transactions = [];
+        foreach ($recentTransactionsData as $trx) {
+            $statusMap = [
+                'pending' => 'Menunggu',
+                'success' => 'Sukses',
+                'failed' => 'Gagal'
+            ];
+            
+            $recent_transactions[] = [
+                'user' => $trx->user->name,
+                'product' => $trx->product->name,
+                'total' => 'Rp ' . number_format($trx->total_amount, 0, ',', '.'),
+                'payment' => $trx->payment_method,
+                'status' => $statusMap[$trx->status] ?? $trx->status,
+            ];
+        }
+
+        // We also need chart data for 'Statistik Pendapatan'
+        // Grouping revenue by month for the last 6 months
+        $chartData = [];
+        $chartLabels = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $revenue = \App\Models\Transaction::where('status', 'success')
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->sum('total_amount');
+            
+            $chartLabels[] = $month->translatedFormat('M Y');
+            // convert to millions for the chart (optional, but keeps numbers small)
+            $chartData[] = round($revenue / 1000000, 2); 
+        }
+
+        return view('admin.dashboard', compact('admin', 'stats', 'recent_transactions', 'chartLabels', 'chartData'));
     }
 
     public function produk()
