@@ -14,34 +14,18 @@ class UserSeeder extends Seeder
     {
         \App\Models\User::create([
             'name' => 'Superadmin',
-            'email' => 'admin@aksespro.id',
-            'password' => bcrypt('password'),
+            'email' => 'adhyaksa209@gmail.com',
+            'password' => bcrypt('akuadmin456'),
             'role' => 'admin',
             'points' => 0,
         ]);
 
         \App\Models\User::create([
-            'name' => 'Budi Mahasiswa',
-            'email' => 'budi@student.ac.id',
-            'password' => bcrypt('password'),
+            'name' => 'Adhyaksa',
+            'email' => 'adhyaksa.daudi.2405336@students.um.ac.id',
+            'password' => bcrypt('adhydaudi005'),
             'role' => 'member',
             'points' => 1500,
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Siti Aminah',
-            'email' => 'siti@student.ac.id',
-            'password' => bcrypt('password'),
-            'role' => 'member',
-            'points' => 500,
-        ]);
-
-        \App\Models\User::create([
-            'name' => 'Andi Wijaya',
-            'email' => 'andi@student.ac.id',
-            'password' => bcrypt('password'),
-            'role' => 'member',
-            'points' => 0,
         ]);
     }
 }

@@ -61,16 +61,22 @@ class UserDashboardController extends Controller
 
     public function katalog()
     {
-        $user = ['name' => 'Adhy', 'points' => 100];
-        $products = [
-            ['name' => 'Netflix Premium', 'category' => 'Streaming', 'price' => 35000, 'original_price' => 50000, 'duration' => '1 Bulan'],
-            ['name' => 'Spotify Family', 'category' => 'Musik', 'price' => 25000, 'original_price' => 35000, 'duration' => '1 Bulan'],
-            ['name' => 'Canva Pro', 'category' => 'Desain', 'price' => 15000, 'original_price' => 25000, 'duration' => '1 Bulan'],
-            ['name' => 'Youtube Premium', 'category' => 'Streaming', 'price' => 20000, 'original_price' => 30000, 'duration' => '1 Bulan'],
-            ['name' => 'Zoom Pro', 'category' => 'Produktivitas', 'price' => 40000, 'original_price' => 60000, 'duration' => '1 Bulan'],
-            ['name' => 'Microsoft 365', 'category' => 'Produktivitas', 'price' => 50000, 'original_price' => 80000, 'duration' => '1 Tahun'],
-        ];
+        $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
+        $user = ['name' => $userModel->name, 'points' => $userModel->points];
+        
+        $products = \App\Models\Product::where('is_active', true)->get();
+        
         return view('user.katalog', compact('user', 'products'));
+    }
+
+    public function showProduct($id)
+    {
+        $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
+        $user = ['name' => $userModel->name, 'points' => $userModel->points];
+
+        $product = \App\Models\Product::findOrFail($id);
+
+        return view('user.katalog-detail', compact('user', 'product'));
     }
 
     public function langganan()

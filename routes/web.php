@@ -24,6 +24,7 @@ use App\Http\Controllers\AdminDashboardController;
 
 Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 Route::get('/user/katalog', [UserDashboardController::class, 'katalog'])->name('user.katalog');
+Route::get('/user/katalog/{id}', [UserDashboardController::class, 'showProduct'])->name('user.katalog.detail');
 Route::get('/user/langganan', [UserDashboardController::class, 'langganan'])->name('user.langganan');
 Route::get('/user/transaksi', [UserDashboardController::class, 'transaksi'])->name('user.transaksi');
 Route::get('/user/poin', [UserDashboardController::class, 'poin'])->name('user.poin');
