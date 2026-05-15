@@ -8,7 +8,7 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div class="space-y-6">
+    <div x-data="{ category: 'Semua' }" class="space-y-6">
         
         <!-- Header Section -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -19,18 +19,26 @@
             
             <!-- Category Filter -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
-                <button class="px-4 py-2 bg-[#0A2540] text-white rounded-full text-sm font-medium whitespace-nowrap transition-colors">Semua</button>
-                <button class="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-sm font-medium whitespace-nowrap transition-colors">Streaming</button>
-                <button class="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-sm font-medium whitespace-nowrap transition-colors">Musik</button>
-                <button class="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-sm font-medium whitespace-nowrap transition-colors">Desain</button>
-                <button class="px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full text-sm font-medium whitespace-nowrap transition-colors">Produktivitas</button>
+                <button @click="category = 'Semua'" :class="category === 'Semua' ? 'bg-[#0A2540] text-white border-[#0A2540]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'" class="px-4 py-2 border rounded-full text-sm font-medium whitespace-nowrap transition-colors">Semua</button>
+                <button @click="category = 'Streaming'" :class="category === 'Streaming' ? 'bg-[#0A2540] text-white border-[#0A2540]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'" class="px-4 py-2 border rounded-full text-sm font-medium whitespace-nowrap transition-colors">Streaming</button>
+                <button @click="category = 'Musik'" :class="category === 'Musik' ? 'bg-[#0A2540] text-white border-[#0A2540]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'" class="px-4 py-2 border rounded-full text-sm font-medium whitespace-nowrap transition-colors">Musik</button>
+                <button @click="category = 'Desain'" :class="category === 'Desain' ? 'bg-[#0A2540] text-white border-[#0A2540]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'" class="px-4 py-2 border rounded-full text-sm font-medium whitespace-nowrap transition-colors">Desain</button>
+                <button @click="category = 'Produktivitas'" :class="category === 'Produktivitas' ? 'bg-[#0A2540] text-white border-[#0A2540]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'" class="px-4 py-2 border rounded-full text-sm font-medium whitespace-nowrap transition-colors">Produktivitas</button>
             </div>
         </div>
 
         <!-- Product Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($products as $product)
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
+            <div x-show="category === 'Semua' || category === '{{ $product->category }}'" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-90"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-90"
+                 class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full"
+                 style="display: none;">
                 <!-- Top / Banner Part -->
                 <div class="h-24 bg-gradient-to-r from-gray-50 to-gray-100 relative flex justify-end p-4">
                     <!-- Discount Badge -->

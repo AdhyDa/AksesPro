@@ -80,7 +80,9 @@ class AdminDashboardController extends Controller
 
     public function produk()
     {
-        $admin = ['name' => 'Superadmin'];
+        $adminModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'admin')->first();
+        $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
+
         $products = [
             ['id' => 1, 'name' => 'Netflix Premium 1 Bulan', 'category' => 'Streaming', 'price' => 35000, 'stock' => 15, 'max_stock' => 20, 'status' => 'Aktif', 'desc' => 'Akun sharing 1 profile 1 device. Resolusi 4K UHD. Garansi penuh 1 bulan.'],
             ['id' => 2, 'name' => 'Spotify Family 1 Bulan', 'category' => 'Musik', 'price' => 25000, 'stock' => 0, 'max_stock' => 10, 'status' => 'Habis', 'desc' => 'Invite via link family. Akun private region Indonesia. Anti banned.'],
@@ -91,7 +93,9 @@ class AdminDashboardController extends Controller
 
     public function transaksi()
     {
-        $admin = ['name' => 'Superadmin'];
+        $adminModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'admin')->first();
+        $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
+
         $transactions = [
             ['id' => 'TRX-901', 'date' => '2026-05-11 10:30', 'user' => 'Budi Santoso', 'product' => 'Netflix Premium 1 Bulan', 'total' => 'Rp 35.000', 'method' => 'QRIS', 'status' => 'Menunggu'],
             ['id' => 'TRX-900', 'date' => '2026-05-11 09:15', 'user' => 'Siti Aminah', 'product' => 'Spotify Family 1 Bulan', 'total' => 'Rp 25.000', 'method' => 'Transfer BCA', 'status' => 'Sukses'],
@@ -102,7 +106,9 @@ class AdminDashboardController extends Controller
 
     public function pengguna()
     {
-        $admin = ['name' => 'Superadmin'];
+        $adminModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'admin')->first();
+        $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
+
         $users = [
             ['id' => 1, 'name' => 'Budi Santoso', 'email' => 'budi@student.ac.id', 'role' => 'Member', 'points' => 1200, 'join_date' => '2026-01-15', 'status' => 'Aktif'],
             ['id' => 2, 'name' => 'Siti Aminah', 'email' => 'siti@gmail.com', 'role' => 'Member', 'points' => 450, 'join_date' => '2026-03-22', 'status' => 'Aktif'],
@@ -113,13 +119,17 @@ class AdminDashboardController extends Controller
 
     public function laporan()
     {
-        $admin = ['name' => 'Superadmin'];
+        $adminModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'admin')->first();
+        $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
+
         return view('admin.laporan', compact('admin'));
     }
 
     public function pengaturan()
     {
-        $admin = ['name' => 'Superadmin'];
+        $adminModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'admin')->first();
+        $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
+
         return view('admin.pengaturan', compact('admin'));
     }
 }

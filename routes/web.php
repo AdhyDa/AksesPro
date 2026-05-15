@@ -28,6 +28,8 @@ Route::get('/user/katalog/{id}', [UserDashboardController::class, 'showProduct']
 Route::get('/user/langganan', [UserDashboardController::class, 'langganan'])->name('user.langganan');
 Route::get('/user/transaksi', [UserDashboardController::class, 'transaksi'])->name('user.transaksi');
 Route::get('/user/poin', [UserDashboardController::class, 'poin'])->name('user.poin');
+Route::get('/user/poin/{id}', [UserDashboardController::class, 'showPoinProduct'])->name('user.poin.detail');
+Route::post('/user/poin/{id}/redeem', [UserDashboardController::class, 'redeemPoin'])->name('user.poin.redeem');
 Route::get('/user/bantuan', [UserDashboardController::class, 'bantuan'])->name('user.bantuan');
 
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');

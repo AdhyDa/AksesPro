@@ -10,6 +10,20 @@
     <!-- Page Content -->
     <div class="space-y-8">
         
+        @if(session('success'))
+            <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 flex items-center gap-3">
+                <svg class="w-5 h-5 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-sm font-medium">{{ session('success') }}</p>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 flex items-center gap-3">
+                <svg class="w-5 h-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-sm font-medium">{{ session('error') }}</p>
+            </div>
+        @endif
+
         <!-- Header Section -->
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Tukar Poin</h1>
@@ -53,7 +67,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($products as $product)
                 @php
-                    $canRedeem = $user['points'] >= $product['price'];
+                    $canRedeem = $user['points'] >= $product->aksespro_price;
                 @endphp
                 <div class="bg-white rounded-2xl shadow-sm border {{ $canRedeem ? 'border-[#00E5FF]/30' : 'border-gray-100' }} overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full relative">
                     
@@ -68,38 +82,38 @@
                     <div class="h-24 bg-gradient-to-r from-gray-50 to-gray-100 relative flex justify-end p-4">
                         <!-- Icon / Initial -->
                         <div class="absolute -bottom-8 left-6 w-16 h-16 bg-white rounded-xl shadow-md border border-gray-50 flex items-center justify-center overflow-hidden p-2 group-hover:-translate-y-1 transition-transform">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($product['name']) }}&background=00E5FF&color=0A2540&font-size=0.4&bold=true" alt="{{ $product['name'] }}" class="w-full h-full object-contain rounded-lg">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($product->name) }}&background=00E5FF&color=0A2540&font-size=0.4&bold=true" alt="{{ $product->name }}" class="w-full h-full object-contain rounded-lg">
                         </div>
                     </div>
 
                     <!-- Body -->
                     <div class="pt-12 p-6 flex-1 flex flex-col">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="text-xs font-semibold text-[#00b8cc] bg-[#00E5FF]/10 px-2.5 py-1 rounded-md">{{ $product['category'] }}</span>
+                            <span class="text-xs font-semibold text-[#00b8cc] bg-[#00E5FF]/10 px-2.5 py-1 rounded-md">{{ $product->category }}</span>
                             <span class="text-xs font-medium text-gray-500 flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                {{ $product['duration'] }}
+                                {{ $product->duration_days }} Hari
                             </span>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-4 line-clamp-1">{{ $product['name'] }}</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-4 line-clamp-1">{{ $product->name }}</h3>
                         
                         <!-- Pricing & Action -->
                         <div class="mt-auto pt-4 border-t border-gray-50 flex flex-col gap-4">
                             <div>
                                 <p class="text-xs text-gray-500 mb-1">Harga Penukaran:</p>
                                 <div class="flex items-end gap-2">
-                                    <p class="text-2xl font-black {{ $canRedeem ? 'text-[#0A2540]' : 'text-gray-400' }}">{{ number_format($product['price'], 0, ',', '.') }}</p>
+                                    <p class="text-2xl font-black {{ $canRedeem ? 'text-[#0A2540]' : 'text-gray-400' }}">{{ number_format($product->aksespro_price, 0, ',', '.') }}</p>
                                     <p class="text-sm font-semibold {{ $canRedeem ? 'text-[#00b8cc]' : 'text-gray-400' }} mb-1">Poin</p>
                                 </div>
                             </div>
                             
                             @if($canRedeem)
-                                <button class="w-full bg-[#0A2540] hover:bg-[#0d2e59] text-white py-2.5 rounded-xl font-bold transition-colors shadow-sm flex justify-center items-center gap-2">
+                                <a href="{{ route('user.poin.detail', $product->id) }}" class="w-full bg-[#0A2540] hover:bg-[#0d2e59] text-white py-2.5 rounded-xl font-bold transition-colors shadow-sm flex justify-center items-center gap-2">
                                     Tukar Sekarang
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                </button>
+                                </a>
                             @else
-                                @php $shortfall = $product['price'] - $user['points']; @endphp
+                                @php $shortfall = $product->aksespro_price - $user['points']; @endphp
                                 <button disabled class="w-full bg-gray-100 text-gray-400 py-2.5 rounded-xl font-bold cursor-not-allowed">
                                     Kurang {{ number_format($shortfall, 0, ',', '.') }} Poin
                                 </button>
