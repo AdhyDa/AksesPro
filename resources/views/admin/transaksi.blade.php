@@ -8,7 +8,21 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div class="space-y-6">
+    <div x-data="{ search: '', filterStatus: 'Semua Status', filterDate: '', showToast: false, toastMessage: '' }" class="space-y-6">
+        
+        <!-- Toast Notification -->
+        <div x-show="showToast" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            class="fixed bottom-4 right-4 z-50 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"
+            style="display: none;">
+            <svg class="w-5 h-5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span x-text="toastMessage" class="text-sm font-medium"></span>
+        </div>
         
         <!-- Header Section -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -16,7 +30,7 @@
                 <h1 class="text-2xl font-bold text-gray-900">Data Transaksi</h1>
                 <p class="text-sm text-gray-500 mt-1">Kelola dan verifikasi seluruh transaksi pembelian dari pengguna.</p>
             </div>
-            <button class="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
+            <button @click="toastMessage = 'Mengekspor data ke CSV...'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Export CSV
             </button>
@@ -28,11 +42,11 @@
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <input type="text" class="bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full pl-10 p-3" placeholder="Cari ID Transaksi atau Nama User...">
+                <input type="text" x-model="search" class="bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full pl-10 p-3" placeholder="Cari ID Transaksi atau Nama User...">
             </div>
             <div class="flex gap-2">
-                <input type="date" class="bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] p-3">
-                <select class="bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] p-3">
+                <input type="date" x-model="filterDate" class="bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] p-3">
+                <select x-model="filterStatus" class="bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] p-3 pr-10">
                     <option>Semua Status</option>
                     <option>Menunggu</option>
                     <option>Sukses</option>
@@ -58,7 +72,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($transactions as $trx)
-                        <tr class="bg-white hover:bg-gray-50 transition-colors">
+                        <tr x-show="(filterStatus === 'Semua Status' || filterStatus === '{{ $trx['status'] }}') && ('{{ strtolower($trx['user']) }}'.includes(search.toLowerCase()) || '{{ strtolower($trx['id']) }}'.includes(search.toLowerCase()))" class="bg-white hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="font-mono text-xs font-bold text-[#0A2540]">{{ $trx['id'] }}</div>
                                 <div class="text-xs text-gray-400 mt-1">{{ $trx['date'] }}</div>
@@ -93,14 +107,14 @@
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center gap-2">
                                     @if($trx['status'] == 'Menunggu')
-                                        <button class="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors" title="Verifikasi Transaksi">
+                                        <button @click="toastMessage = 'Transaksi {{ $trx['id'] }} berhasil diverifikasi'; showToast = true; setTimeout(() => showToast = false, 3000)" class="p-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors" title="Verifikasi Transaksi">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                         </button>
-                                        <button class="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors" title="Tolak Transaksi">
+                                        <button @click="toastMessage = 'Transaksi {{ $trx['id'] }} ditolak'; showToast = true; setTimeout(() => showToast = false, 3000)" class="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors" title="Tolak Transaksi">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                         </button>
                                     @endif
-                                    <button class="p-2 bg-gray-50 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors" title="Detail">
+                                    <button @click="toastMessage = 'Menampilkan detail {{ $trx['id'] }}'; showToast = true; setTimeout(() => showToast = false, 3000)" class="p-2 bg-gray-50 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors" title="Detail">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </button>
                                 </div>

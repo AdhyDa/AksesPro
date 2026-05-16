@@ -8,8 +8,22 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div class="space-y-6">
+    <!-- Page Content -->
+    <div x-data="{ showToast: false, toastMessage: '' }" class="space-y-6">
         
+        <!-- Toast Notification -->
+        <div x-show="showToast" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            class="fixed bottom-4 right-4 z-50 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"
+            style="display: none;">
+            <svg class="w-5 h-5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span x-text="toastMessage" class="text-sm font-medium"></span>
+        </div>
         <!-- Header Section -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -18,11 +32,11 @@
             </div>
             
             <div class="flex gap-2">
-                <button class="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2 text-sm">
+                <button @click="toastMessage = 'Pilih filter periode laporan...'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium rounded-xl transition-colors shadow-sm flex items-center gap-2 text-sm">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     Bulan Ini
                 </button>
-                <button class="px-4 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2 text-sm">
+                <button @click="toastMessage = 'Menyiapkan file PDF untuk diunduh...'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-4 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2 text-sm">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                     Cetak PDF
                 </button>

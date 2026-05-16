@@ -8,14 +8,28 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div class="space-y-6">
+    <!-- Page Content -->
+    <div x-data="{ showToast: false, toastMessage: '' }" class="space-y-6">
         
+        <!-- Toast Notification -->
+        <div x-show="showToast" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            class="fixed bottom-4 right-4 z-50 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"
+            style="display: none;">
+            <svg class="w-5 h-5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span x-text="toastMessage" class="text-sm font-medium"></span>
+        </div>
         <!-- Header -->
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
             <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-500">Periode:</span>
-                <select class="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#00E5FF] focus:border-[#00E5FF] block px-3 py-2">
+                <select @change="toastMessage = 'Memuat data untuk periode: ' + $event.target.value; showToast = true; setTimeout(() => showToast = false, 3000)" class="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#00E5FF] focus:border-[#00E5FF] block px-3 py-2 pr-10">
                     <option>Bulan Ini</option>
                     <option>Bulan Lalu</option>
                     <option>Tahun Ini</option>
@@ -120,7 +134,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h2 class="text-lg font-bold text-gray-900">Transaksi Masuk Terbaru</h2>
-                <a href="#" class="px-4 py-2 bg-[#00E5FF]/10 text-[#00b8cc] hover:bg-[#00E5FF]/20 font-semibold rounded-lg text-sm transition-colors">
+                <a href="{{ url('/admin/transaksi') }}" class="px-4 py-2 bg-[#00E5FF]/10 text-[#00b8cc] hover:bg-[#00E5FF]/20 font-semibold rounded-lg text-sm transition-colors">
                     Lihat Semua
                 </a>
             </div>

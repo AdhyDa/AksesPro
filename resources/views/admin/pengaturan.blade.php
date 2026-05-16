@@ -8,7 +8,21 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div class="space-y-6" x-data="{ activeTab: 'umum' }">
+    <div class="space-y-6" x-data="{ activeTab: 'umum', showToast: false, toastMessage: '' }">
+        
+        <!-- Toast Notification -->
+        <div x-show="showToast" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            class="fixed bottom-4 right-4 z-50 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3"
+            style="display: none;">
+            <svg class="w-5 h-5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span x-text="toastMessage" class="text-sm font-medium"></span>
+        </div>
         
         <!-- Header Section -->
         <div>
@@ -58,11 +72,11 @@
                                 <div class="w-16 h-16 bg-[#0A2540] rounded-xl flex items-center justify-center p-2 border border-gray-200">
                                     <img src="{{ asset('Logo.png') }}" class="w-full h-full object-contain">
                                 </div>
-                                <button type="button" class="px-4 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors">Ganti Logo</button>
+                                <button type="button" @click="toastMessage = 'Membuka dialog upload gambar...'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-4 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors">Ganti Logo</button>
                             </div>
                         </div>
                         <div class="pt-6 border-t border-gray-100">
-                            <button type="button" class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm w-full sm:w-auto">Simpan Perubahan</button>
+                            <button type="button" @click="toastMessage = 'Pengaturan umum berhasil disimpan'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm w-full sm:w-auto">Simpan Perubahan</button>
                         </div>
                     </form>
                 </div>
@@ -97,8 +111,8 @@
                             <input type="password" value="SB-Mid-server-xxxxxxxxxxxx" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3 font-mono">
                         </div>
                         <div class="pt-6 border-t border-gray-100 flex gap-4">
-                            <button type="button" class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm flex-1 sm:flex-none">Simpan Kredensial</button>
-                            <button type="button" class="px-6 py-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold rounded-xl transition-colors hidden sm:block">Test Koneksi</button>
+                            <button type="button" @click="toastMessage = 'Kredensial payment gateway disimpan'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm flex-1 sm:flex-none">Simpan Kredensial</button>
+                            <button type="button" @click="toastMessage = 'Koneksi ke Midtrans berhasil!'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-6 py-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold rounded-xl transition-colors hidden sm:block">Test Koneksi</button>
                         </div>
                     </form>
                 </div>
@@ -140,7 +154,7 @@
                             <input type="password" value="********" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
                         </div>
                         <div class="pt-6 border-t border-gray-100">
-                            <button type="button" class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm w-full sm:w-auto">Simpan Konfigurasi</button>
+                            <button type="button" @click="toastMessage = 'Konfigurasi SMTP berhasil disimpan'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm w-full sm:w-auto">Simpan Konfigurasi</button>
                         </div>
                     </form>
                 </div>
