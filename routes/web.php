@@ -3,6 +3,8 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\AdminDashboardController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -10,17 +12,18 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::post('/checkout', [PaymentController::class, 'process'])->name('checkout.process');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    if (auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    return redirect()->route('user.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-use App\Http\Controllers\UserDashboardController;
-use App\Http\Controllers\AdminDashboardController;
 
 Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 Route::get('/user/katalog', [UserDashboardController::class, 'katalog'])->name('user.katalog');

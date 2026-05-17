@@ -34,7 +34,18 @@
                     <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
                         <!-- Product Initial/Icon -->
                         <div class="w-20 h-20 bg-white rounded-2xl p-2 shadow-lg flex-shrink-0">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($product->name) }}&background=00E5FF&color=0A2540&font-size=0.4&bold=true" alt="{{ $product->name }}" class="w-full h-full object-contain rounded-xl">
+                            @php
+                                $pName = strtolower($product->name);
+                                $imagePath = 'image/zoom.jpg'; // default
+                                if(str_contains($pName, 'netflix')) $imagePath = 'image/netflix.jpg';
+                                elseif(str_contains($pName, 'spotify')) $imagePath = 'image/spotify.jpg';
+                                elseif(str_contains($pName, 'canva')) $imagePath = 'image/canva.jpg';
+                                elseif(str_contains($pName, 'youtube')) $imagePath = 'image/youtube.webp';
+                                elseif(str_contains($pName, 'chatgpt')) $imagePath = 'image/chatgpt.jpg';
+                                elseif(str_contains($pName, 'zoom')) $imagePath = 'image/zoom.jpg';
+                                else $imagePath = 'image/zoom.jpg'; // fallback
+                            @endphp
+                            <img src="{{ asset($imagePath) }}" alt="{{ $product->name }}" class="w-full h-full object-contain rounded-xl">
                         </div>
                         
                         <div>

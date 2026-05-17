@@ -21,20 +21,45 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
+            $request->user()->sendEmailVerificationNotification();
         }
 
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Update the user's password.
+     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if (is_null($user->password)) {
+            // SSO User: bypass current password validation
+            $validated = $request->validate([
+                'password' => ['required', \Illuminate\Validation\Rules\Password::defaults(), 'confirmed'],
+            ]);
+        } else {
+            // Regular User: requires current password
+            $validated = $request->validateWithBag('updatePassword', [
+                'current_password' => ['required', 'current_password'],
+                'password' => ['required', \Illuminate\Validation\Rules\Password::defaults(), 'confirmed'],
+            ]);
+        }
+
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+        ]);
+
+        return Redirect::route('profile.edit')->with('status', 'password-updated');
     }
 
     /**

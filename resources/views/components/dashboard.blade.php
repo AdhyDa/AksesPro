@@ -49,7 +49,7 @@
         <!-- Main Content Wrapper -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Navbar -->
-            <header class="flex items-center justify-between h-20 px-6 bg-white border-b border-gray-200 z-10">
+            <header class="flex items-center justify-between h-20 px-6 bg-white border-b border-gray-200 relative z-40">
                 <div class="flex items-center gap-4">
                     <!-- Mobile Hamburger -->
                     <button @click="sidebarOpen = true" class="text-gray-500 hover:text-gray-700 focus:outline-none lg:hidden">
@@ -80,11 +80,18 @@
                         </button>
                         
                         <!-- Dropdown Menu -->
-                        <div x-show="profileOpen" x-transition style="display: none;" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 border border-gray-100 ring-1 ring-black ring-opacity-5">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0A2540]">Profil Saya</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0A2540]">Pengaturan Akun</a>
+                        <div x-show="profileOpen" x-transition style="display: none;" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 border border-gray-100 ring-1 ring-black ring-opacity-5 z-50">
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0A2540]">Profil Saya</a>
                             <div class="border-t border-gray-100 my-1"></div>
-                            <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <a href="{{ route('logout') }}"
+                                    onclick="event.preventDefault();
+                                            this.closest('form').submit();"
+                                    class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    Logout
+                                </a>
+                            </form>
                         </div>
                     </div>
                 </div>

@@ -84,9 +84,9 @@ class AdminDashboardController extends Controller
         $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
 
         $products = [
-            ['id' => 1, 'name' => 'Netflix Premium 1 Bulan', 'category' => 'Streaming', 'price' => 35000, 'stock' => 15, 'max_stock' => 20, 'status' => 'Aktif', 'desc' => 'Akun sharing 1 profile 1 device. Resolusi 4K UHD. Garansi penuh 1 bulan.'],
-            ['id' => 2, 'name' => 'Spotify Family 1 Bulan', 'category' => 'Musik', 'price' => 25000, 'stock' => 0, 'max_stock' => 10, 'status' => 'Habis', 'desc' => 'Invite via link family. Akun private region Indonesia. Anti banned.'],
-            ['id' => 3, 'name' => 'Canva Pro 1 Bulan', 'category' => 'Desain', 'price' => 15000, 'stock' => 50, 'max_stock' => 50, 'status' => 'Nonaktif', 'desc' => 'Invite tim Canva Pro. Semua fitur premium terbuka. Legal 100%.'],
+            ['id' => 1, 'name' => 'Netflix Premium 1 Bulan', 'category' => 'Streaming', 'price' => 18500, 'stock' => 15, 'max_stock' => 20, 'status' => 'Aktif', 'desc' => 'Akun sharing 1 profile 1 device. Resolusi 4K UHD. Garansi penuh 1 bulan.'],
+            ['id' => 2, 'name' => 'Spotify Family 1 Bulan', 'category' => 'Musik', 'price' => 18000, 'stock' => 0, 'max_stock' => 10, 'status' => 'Habis', 'desc' => 'Invite via link family. Akun private region Indonesia. Anti banned.'],
+            ['id' => 3, 'name' => 'Canva Pro 1 Bulan', 'category' => 'Desain', 'price' => 8000, 'stock' => 50, 'max_stock' => 50, 'status' => 'Nonaktif', 'desc' => 'Invite tim Canva Pro. Semua fitur premium terbuka. Legal 100%.'],
         ];
         return view('admin.produk', compact('admin', 'products'));
     }

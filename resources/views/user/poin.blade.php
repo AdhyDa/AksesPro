@@ -82,7 +82,18 @@
                     <div class="h-24 bg-gradient-to-r from-gray-50 to-gray-100 relative flex justify-end p-4">
                         <!-- Icon / Initial -->
                         <div class="absolute -bottom-8 left-6 w-16 h-16 bg-white rounded-xl shadow-md border border-gray-50 flex items-center justify-center overflow-hidden p-2 group-hover:-translate-y-1 transition-transform">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($product->name) }}&background=00E5FF&color=0A2540&font-size=0.4&bold=true" alt="{{ $product->name }}" class="w-full h-full object-contain rounded-lg">
+                            @php
+                                $pName = strtolower($product->name);
+                                $imagePath = 'image/zoom.jpg'; // default
+                                if(str_contains($pName, 'netflix')) $imagePath = 'image/netflix.jpg';
+                                elseif(str_contains($pName, 'spotify')) $imagePath = 'image/spotify.jpg';
+                                elseif(str_contains($pName, 'canva')) $imagePath = 'image/canva.jpg';
+                                elseif(str_contains($pName, 'youtube')) $imagePath = 'image/youtube.webp';
+                                elseif(str_contains($pName, 'chatgpt')) $imagePath = 'image/chatgpt.jpg';
+                                elseif(str_contains($pName, 'zoom')) $imagePath = 'image/zoom.jpg';
+                                else $imagePath = 'image/zoom.jpg'; // fallback
+                            @endphp
+                            <img src="{{ asset($imagePath) }}" alt="{{ $product->name }}" class="w-full h-full object-contain rounded-lg">
                         </div>
                     </div>
 

@@ -61,7 +61,18 @@
                 <!-- Left: Image Area -->
                 <div class="w-full md:w-48 lg:w-56 h-48 md:h-auto bg-gray-50 flex-shrink-0 relative border-r border-gray-100">
                     <div class="absolute inset-0 flex items-center justify-center p-6">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($product['name']) }}&background=00E5FF&color=0A2540&font-size=0.33&bold=true" alt="{{ $product['name'] }}" class="w-full h-full object-contain drop-shadow-md rounded-xl transition-transform group-hover:scale-105">
+                        @php
+                            $pName = strtolower($product['name']);
+                            $imagePath = 'image/zoom.jpg'; // default
+                            if(str_contains($pName, 'netflix')) $imagePath = 'image/netflix.jpg';
+                            elseif(str_contains($pName, 'spotify')) $imagePath = 'image/spotify.jpg';
+                            elseif(str_contains($pName, 'canva')) $imagePath = 'image/canva.jpg';
+                            elseif(str_contains($pName, 'youtube')) $imagePath = 'image/youtube.webp';
+                            elseif(str_contains($pName, 'chatgpt')) $imagePath = 'image/chatgpt.jpg';
+                            elseif(str_contains($pName, 'zoom')) $imagePath = 'image/zoom.jpg';
+                            else $imagePath = 'image/zoom.jpg'; // fallback
+                        @endphp
+                        <img src="{{ asset($imagePath) }}" alt="{{ $product['name'] }}" class="w-full h-full object-contain drop-shadow-md rounded-xl transition-transform group-hover:scale-105">
                     </div>
                 </div>
 

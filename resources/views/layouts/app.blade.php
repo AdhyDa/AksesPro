@@ -47,7 +47,7 @@
         <div class="hidden lg:flex items-center gap-4">
           @auth
             <div class="text-white font-semibold text-sm mr-2 flex items-center gap-1">
-              <span class="text-cyan-accent">Poin:</span> 150
+              <span class="text-cyan-accent">Poin: </span> {{ number_format($user->points ?? 0, 0, ',', '.') }}
             </div>
           @endauth
 
