@@ -8,7 +8,7 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div x-data="{ search: '', filterRole: 'Semua Peran', showToast: false, toastMessage: '' }" class="space-y-6">
+    <div x-data="{ search: '{{ request('search') }}', filterRole: 'Semua Peran', showToast: false, toastMessage: '' }" class="space-y-6">
         
         <!-- Toast Notification -->
         <div x-show="showToast" 

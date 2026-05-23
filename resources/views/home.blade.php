@@ -349,7 +349,7 @@
           priceDiscounted="Rp 19.000"
           discountPercent="84%"
           discountClasses="bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
-          buyUrl="{{ route('user.katalog.detail', 3) }}"
+          buyUrl="{{ route('user.katalog.detail', 'canva-pro-1-tahun') }}"
           buyBtnClasses="btn-primary"
         >
           <x-slot:icon>
@@ -375,7 +375,7 @@
           priceDiscountedClasses="text-cyan-accent text-glow"
           discountPercent="81%"
           discountClasses="bg-cyan-accent/10 text-cyan-accent border border-cyan-accent/30 glow-cyan-sm"
-          buyUrl="{{ route('user.katalog.detail', 2) }}"
+          buyUrl="{{ route('user.katalog.detail', 'spotify-family-1-bulan') }}"
           buyBtnClasses="btn-primary glow-cyan"
         >
           <x-slot:icon>
@@ -399,7 +399,7 @@
           priceDiscounted="Rp 29.000"
           discountPercent="84%"
           discountClasses="bg-red-500/15 text-red-400 border border-red-500/25"
-          buyUrl="{{ route('user.katalog.detail', 1) }}"
+          buyUrl="{{ route('user.katalog.detail', 'netflix-premium-1-bulan') }}"
           buyBtnClasses="bg-red-600 hover:bg-red-500 text-white transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5"
         >
           <x-slot:icon>

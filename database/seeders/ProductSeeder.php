@@ -15,6 +15,7 @@ class ProductSeeder extends Seeder
         \App\Models\Product::insert([
             [
                 'name' => 'Netflix Premium 1 Bulan',
+                'slug' => 'netflix-premium-1-bulan',
                 'category' => 'Streaming',
                 'original_price' => 65000,
                 'aksespro_price' => 18500,
@@ -28,6 +29,7 @@ class ProductSeeder extends Seeder
             ],
             [
                 'name' => 'Spotify Family 1 Bulan',
+                'slug' => 'spotify-family-1-bulan',
                 'category' => 'Musik',
                 'original_price' => 86900,
                 'aksespro_price' => 18000,
@@ -41,6 +43,7 @@ class ProductSeeder extends Seeder
             ],
             [
                 'name' => 'Canva Pro 1 Tahun',
+                'slug' => 'canva-pro-1-tahun',
                 'category' => 'Desain',
                 'original_price' => 1000000,
                 'aksespro_price' => 8000,
@@ -54,6 +57,7 @@ class ProductSeeder extends Seeder
             ],
             [
                 'name' => 'YouTube Premium 1 Bulan',
+                'slug' => 'youtube-premium-1-bulan',
                 'category' => 'Streaming',
                 'original_price' => 139000,
                 'aksespro_price' => 4500,
@@ -67,6 +71,7 @@ class ProductSeeder extends Seeder
             ],
             [
                 'name' => 'ChatGPT Plus 1 Bulan',
+                'slug' => 'chatgpt-plus-1-bulan',
                 'category' => 'Produktivitas',
                 'original_price' => 350000,
                 'aksespro_price' => 31000,

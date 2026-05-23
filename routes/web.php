@@ -27,11 +27,12 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 Route::get('/user/katalog', [UserDashboardController::class, 'katalog'])->name('user.katalog');
-Route::get('/user/katalog/{id}', [UserDashboardController::class, 'showProduct'])->name('user.katalog.detail');
+Route::get('/user/katalog/{slug}', [UserDashboardController::class, 'showProduct'])->name('user.katalog.detail');
 Route::get('/user/langganan', [UserDashboardController::class, 'langganan'])->name('user.langganan');
 Route::get('/user/transaksi', [UserDashboardController::class, 'transaksi'])->name('user.transaksi');
+Route::get('/user/transaksi/{invoice_id}/invoice', [UserDashboardController::class, 'downloadInvoice'])->name('user.transaksi.invoice');
 Route::get('/user/poin', [UserDashboardController::class, 'poin'])->name('user.poin');
-Route::get('/user/poin/{id}', [UserDashboardController::class, 'showPoinProduct'])->name('user.poin.detail');
+Route::get('/user/poin/{slug}', [UserDashboardController::class, 'showPoinProduct'])->name('user.poin.detail');
 Route::post('/user/poin/{id}/redeem', [UserDashboardController::class, 'redeemPoin'])->name('user.poin.redeem');
 Route::get('/user/bantuan', [UserDashboardController::class, 'bantuan'])->name('user.bantuan');
 

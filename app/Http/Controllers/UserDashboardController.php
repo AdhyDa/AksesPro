@@ -53,28 +53,40 @@ class UserDashboardController extends Controller
                 'package' => $sub->product->duration_days . ' Hari',
                 'end_date' => $sub->end_date->format('Y-m-d'),
                 'status' => 'Aktif', // we filter by active anyway
+                'product_slug' => $sub->product->slug,
             ];
         }
 
         return view('user.dashboard', compact('user', 'stats', 'subscriptions'));
     }
 
-    public function katalog()
+    public function katalog(Request $request)
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
         $user = ['name' => $userModel->name, 'points' => $userModel->points];
         
-        $products = \App\Models\Product::where('is_active', true)->get();
+        $query = \App\Models\Product::where('is_active', true);
+        
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('category', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('description', 'like', '%' . $searchTerm . '%');
+            });
+        }
+        
+        $products = $query->get();
         
         return view('user.katalog', compact('user', 'products'));
     }
 
-    public function showProduct($id)
+    public function showProduct($slug)
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
         $user = ['name' => $userModel->name, 'points' => $userModel->points];
 
-        $product = \App\Models\Product::findOrFail($id);
+        $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
 
         return view('user.katalog-detail', compact('user', 'product'));
     }
@@ -97,6 +109,7 @@ class UserDashboardController extends Controller
                 'end_date' => $sub->end_date->format('Y-m-d'),
                 'status' => ucfirst($sub->status),
                 'auto_renew' => $sub->auto_renew,
+                'product_slug' => $sub->product->slug,
             ];
         }
 
@@ -134,6 +147,17 @@ class UserDashboardController extends Controller
         return view('user.transaksi', compact('user', 'transactions'));
     }
 
+    public function downloadInvoice($invoiceId)
+    {
+        $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
+        $transaction = \App\Models\Transaction::with(['product', 'user'])
+            ->where('invoice_id', $invoiceId)
+            ->where('user_id', $userModel->id)
+            ->firstOrFail();
+
+        return view('user.invoice', compact('transaction'));
+    }
+
     public function poin()
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
@@ -144,12 +168,12 @@ class UserDashboardController extends Controller
         return view('user.poin', compact('user', 'products'));
     }
 
-    public function showPoinProduct($id)
+    public function showPoinProduct($slug)
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
         $user = ['name' => $userModel->name, 'points' => $userModel->points];
 
-        $product = \App\Models\Product::findOrFail($id);
+        $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
 
         return view('user.poin-detail', compact('user', 'product'));
     }
