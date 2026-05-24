@@ -34,7 +34,7 @@
                 <!-- SSO Buttons -->
                 <div class="space-y-4 mb-8">
                     <!-- Google SSO -->
-                    <a href="{{ route('google.login') }}"
+                    <a id="btn-google-sso" href="{{ route('google.login') }}"
                         class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 rounded-full py-3 px-4 text-gray-700 font-semibold hover:bg-gray-50 transition shadow-sm">
                         <svg class="w-5 h-5" viewBox="0 0 24 24">
                             <path
@@ -55,7 +55,7 @@
                     </a>
 
                     <!-- Student Account -->
-                    <button type="button" @click="isStudentMode = !isStudentMode"
+                    <button type="button" id="btn-student-toggle" @click="isStudentMode = !isStudentMode"
                         :class="isStudentMode ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' :
                             'border-gray-300 bg-white hover:bg-gray-50'"
                         class="w-full flex flex-col items-center justify-center gap-1 border rounded-full py-2 px-4 text-gray-700 font-semibold transition shadow-sm">

@@ -23,18 +23,26 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/user/katalog', [UserDashboardController::class, 'katalog'])->name('user.katalog');
+    Route::get('/user/katalog/{slug}', [UserDashboardController::class, 'showProduct'])->name('user.katalog.detail');
+    Route::get('/user/langganan', [UserDashboardController::class, 'langganan'])->name('user.langganan');
+    Route::get('/user/transaksi', [UserDashboardController::class, 'transaksi'])->name('user.transaksi');
+    Route::get('/user/transaksi/{invoice_id}/invoice', [UserDashboardController::class, 'downloadInvoice'])->name('user.transaksi.invoice');
+    Route::get('/user/poin', [UserDashboardController::class, 'poin'])->name('user.poin');
+    Route::get('/user/poin/{slug}', [UserDashboardController::class, 'showPoinProduct'])->name('user.poin.detail');
+    Route::post('/user/poin/{id}/redeem', [UserDashboardController::class, 'redeemPoin'])->name('user.poin.redeem');
+    Route::get('/user/bantuan', [UserDashboardController::class, 'bantuan'])->name('user.bantuan');
+
+    // Midtrans Snap Checkout
+    Route::post('/user/checkout/{slug}', [\App\Http\Controllers\TransactionController::class, 'processPayment'])->name('user.checkout.process');
 });
 
-Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
-Route::get('/user/katalog', [UserDashboardController::class, 'katalog'])->name('user.katalog');
-Route::get('/user/katalog/{slug}', [UserDashboardController::class, 'showProduct'])->name('user.katalog.detail');
-Route::get('/user/langganan', [UserDashboardController::class, 'langganan'])->name('user.langganan');
-Route::get('/user/transaksi', [UserDashboardController::class, 'transaksi'])->name('user.transaksi');
-Route::get('/user/transaksi/{invoice_id}/invoice', [UserDashboardController::class, 'downloadInvoice'])->name('user.transaksi.invoice');
-Route::get('/user/poin', [UserDashboardController::class, 'poin'])->name('user.poin');
-Route::get('/user/poin/{slug}', [UserDashboardController::class, 'showPoinProduct'])->name('user.poin.detail');
-Route::post('/user/poin/{id}/redeem', [UserDashboardController::class, 'redeemPoin'])->name('user.poin.redeem');
-Route::get('/user/bantuan', [UserDashboardController::class, 'bantuan'])->name('user.bantuan');
+// Midtrans Webhook Callback (Public)
+Route::post('/midtrans/callback', [\App\Http\Controllers\MidtransCallbackController::class, 'handleNotification'])->name('midtrans.callback');
+
+
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Dashboard & Laporan

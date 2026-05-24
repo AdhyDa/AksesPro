@@ -370,8 +370,13 @@ class AdminDashboardController extends Controller
             \App\Models\UserSubscription::create([
                 'user_id' => $trx->user_id,
                 'product_id' => $trx->product_id,
-                'starts_at' => now(),
-                'expires_at' => now()->addDays($trx->product ? $trx->product->duration_days : 30),
+                'start_date' => now(),
+                'end_date' => now()->addDays($trx->product ? $trx->product->duration_days : 30),
+                'account_credentials' => [
+                    'email' => strtolower(str_replace(' ', '', $trx->user ? $trx->user->name : 'user')) . '@aksespro.net',
+                    'password' => 'AP-' . rand(1000, 9999),
+                    'profile' => 'Profile ' . rand(1, 4)
+                ],
                 'status' => 'active',
             ]);
         }

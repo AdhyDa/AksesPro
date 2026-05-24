@@ -8,7 +8,7 @@ class Transaction extends Model
 {
     protected $fillable = [
         'invoice_id', 'user_id', 'product_id', 'total_amount', 
-        'payment_method', 'status', 'paid_at'
+        'payment_method', 'status', 'paid_at', 'snap_token'
     ];
 
     public function user()

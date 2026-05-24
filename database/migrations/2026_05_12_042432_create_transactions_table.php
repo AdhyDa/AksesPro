@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('total_amount');
             $table->string('payment_method');
             $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
+            $table->string('snap_token')->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
         });

@@ -178,15 +178,19 @@
                         </div>
                     </div>
 
-                    <button
-                        class="w-full bg-[#0A2540] hover:bg-[#0d2e59] text-white py-3.5 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] shadow-md flex items-center justify-center gap-2 {{ $product->stock <= 0 ? 'opacity-50 cursor-not-allowed hover:scale-100' : '' }}"
-                        {{ $product->stock <= 0 ? 'disabled' : '' }}>
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        Beli Sekarang
-                    </button>
+                    <form action="{{ route('user.checkout.process', $product->slug) }}" method="POST">
+                        @csrf
+                        <button
+                            type="submit"
+                            class="w-full bg-[#0A2540] hover:bg-[#0d2e59] text-white py-3.5 rounded-xl font-bold text-lg transition-all transform hover:scale-[1.02] shadow-md flex items-center justify-center gap-2 {{ $product->stock <= 0 ? 'opacity-50 cursor-not-allowed hover:scale-100' : '' }}"
+                            {{ $product->stock <= 0 ? 'disabled' : '' }}>
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Beli Sekarang
+                        </button>
+                    </form>
                     <p class="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

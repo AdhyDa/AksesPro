@@ -11,9 +11,11 @@ class UserDashboardController extends Controller
         // For development/demonstration, we fetch the first member user if not authenticated
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
         
+        $this->syncPendingTransactions($userModel);
+        
         $user = [
-            'name' => $userModel->name,
-            'points' => $userModel->points,
+            'name' => $userModel->fresh()->name,
+            'points' => $userModel->fresh()->points,
         ];
 
         $activeSubscriptions = \App\Models\UserSubscription::where('user_id', $userModel->id)
@@ -37,7 +39,7 @@ class UserDashboardController extends Controller
         $stats = [
             'active_subscriptions' => $activeSubscriptions,
             'total_transactions' => $totalTransactions,
-            'points_collected' => $userModel->points,
+            'points_collected' => $userModel->fresh()->points,
             'estimated_savings' => 'Rp ' . number_format($estimatedSavings, 0, ',', '.'),
         ];
 
@@ -119,7 +121,10 @@ class UserDashboardController extends Controller
     public function transaksi()
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $user = ['name' => $userModel->name, 'points' => $userModel->points];
+        
+        $this->syncPendingTransactions($userModel);
+        
+        $user = ['name' => $userModel->fresh()->name, 'points' => $userModel->fresh()->points];
 
         $transactionsData = \App\Models\Transaction::with('product')
             ->where('user_id', $userModel->id)
@@ -232,5 +237,76 @@ class UserDashboardController extends Controller
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
         $user = ['name' => $userModel->name, 'points' => $userModel->points];
         return view('user.bantuan', compact('user'));
+    }
+
+    private function syncPendingTransactions($userModel)
+    {
+        $pendingTransactions = \App\Models\Transaction::where('user_id', $userModel->id)
+            ->where('status', 'pending')
+            ->where('payment_method', 'Midtrans Snap')
+            ->get();
+
+        if ($pendingTransactions->isEmpty()) {
+            return;
+        }
+
+        try {
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$isProduction = filter_var(config('midtrans.is_production', false), FILTER_VALIDATE_BOOLEAN);
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
+            
+            foreach ($pendingTransactions as $trx) {
+                try {
+                    $statusResponse = \Midtrans\Transaction::status($trx->invoice_id);
+                } catch (\Exception $e) {
+                    continue; // Skip if transaction order ID doesn't exist yet on Midtrans side
+                }
+                
+                if (isset($statusResponse->transaction_status)) {
+                    $txStatus = $statusResponse->transaction_status;
+                    $fraudStatus = $statusResponse->fraud_status ?? null;
+                    
+                    if ($txStatus === 'settlement' || ($txStatus === 'capture' && $fraudStatus === 'accept')) {
+                        $trx->update([
+                            'status' => 'success',
+                            'paid_at' => now(),
+                            'payment_method' => $statusResponse->payment_type ?? $trx->payment_method,
+                        ]);
+                        
+                        $product = $trx->product;
+                        
+                        // Prevent duplicate subscription
+                        $existingSub = \App\Models\UserSubscription::where('user_id', $trx->user_id)
+                            ->where('product_id', $trx->product_id)
+                            ->where('start_date', '>=', now()->startOfDay())
+                            ->first();
+                            
+                        if (!$existingSub) {
+                            \App\Models\UserSubscription::create([
+                                'user_id' => $trx->user_id,
+                                'product_id' => $trx->product_id,
+                                'start_date' => now(),
+                                'end_date' => now()->addDays($product ? $product->duration_days : 30),
+                                'account_credentials' => [
+                                    'email' => strtolower(str_replace(' ', '', $userModel->name)) . '@aksespro.net',
+                                    'password' => 'AP-' . rand(1000, 9999),
+                                    'profile' => 'Profile ' . rand(1, 4)
+                                ],
+                                'status' => 'active',
+                            ]);
+                            
+                            $userModel->increment('points', 10);
+                        }
+                    } elseif (in_array($txStatus, ['deny', 'expire', 'cancel', 'failed'])) {
+                        $trx->update([
+                            'status' => 'failed'
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to sync pending transaction statuses: ' . $e->getMessage());
+        }
     }
 }
