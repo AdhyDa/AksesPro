@@ -8,7 +8,7 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div class="space-y-6" x-data="{ activeTab: 'umum', showToast: false, toastMessage: '' }">
+    <div class="space-y-6" x-data="{ activeTab: localStorage.getItem('setting_tab') || 'umum', showToast: false, toastMessage: '' }">
 
         <!-- Toast Notification -->
         <div x-show="showToast" x-transition:enter="transition ease-out duration-300"
@@ -32,14 +32,53 @@
             <p class="text-sm text-gray-500 mt-1">Konfigurasi umum, pembayaran, dan preferensi aplikasi.</p>
         </div>
 
+        @if (session('success'))
+            <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-semibold text-emerald-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-semibold text-red-800">Harap perbaiki kesalahan input berikut:</p>
+                        <ul class="list-disc list-inside text-xs text-red-700 mt-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div
             class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row min-h-[600px]">
 
-            <!-- Tabs Navigation (Sidebar on Desktop, Top on Mobile) -->
+            <!-- Tabs Navigation -->
             <div
                 class="w-full md:w-64 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-100 p-4 sm:p-6 flex-shrink-0">
                 <nav class="flex md:flex-col gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
-                    <button @click="activeTab = 'umum'"
+                    <button @click="activeTab = 'umum'; localStorage.setItem('setting_tab', 'umum')"
                         :class="activeTab === 'umum' ? 'bg-white text-[#0A2540] shadow-sm border-gray-200' :
                             'text-gray-500 hover:bg-gray-100 border-transparent'"
                         class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border whitespace-nowrap text-left w-full">
@@ -51,7 +90,7 @@
                         </svg>
                         Umum
                     </button>
-                    <button @click="activeTab = 'pembayaran'"
+                    <button @click="activeTab = 'pembayaran'; localStorage.setItem('setting_tab', 'pembayaran')"
                         :class="activeTab === 'pembayaran' ? 'bg-white text-[#0A2540] shadow-sm border-gray-200' :
                             'text-gray-500 hover:bg-gray-100 border-transparent'"
                         class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border whitespace-nowrap text-left w-full">
@@ -61,7 +100,7 @@
                         </svg>
                         Payment Gateway
                     </button>
-                    <button @click="activeTab = 'email'"
+                    <button @click="activeTab = 'email'; localStorage.setItem('setting_tab', 'email')"
                         :class="activeTab === 'email' ? 'bg-white text-[#0A2540] shadow-sm border-gray-200' :
                             'text-gray-500 hover:bg-gray-100 border-transparent'"
                         class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all border whitespace-nowrap text-left w-full">
@@ -81,33 +120,40 @@
                 <div x-show="activeTab === 'umum'" style="display: none;" x-transition.opacity.duration.300ms>
                     <h2 class="text-xl font-bold text-gray-900 mb-6">Pengaturan Umum</h2>
 
-                    <form class="space-y-6 max-w-2xl">
+                    <form action="{{ route('admin.pengaturan.umum') }}" method="POST" enctype="multipart/form-data"
+                        class="space-y-6 max-w-2xl">
+                        @csrf
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nama Aplikasi</label>
-                            <input type="text" value="AksesPro"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
+                            <input type="text" name="system_name"
+                                value="{{ \App\Models\Setting::get('system_name', 'AksesPro') }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Website</label>
-                            <textarea rows="3"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">Platform Vending Machine Lisensi Digital Premium untuk Mahasiswa.</textarea>
+                            <textarea name="system_description" rows="3"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                required>{{ \App\Models\Setting::get('system_description', 'Platform Vending Machine Lisensi Digital Premium untuk Mahasiswa.') }}</textarea>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Logo Website</label>
                             <div class="flex items-center gap-4">
                                 <div
                                     class="w-16 h-16 bg-[#0A2540] rounded-xl flex items-center justify-center p-2 border border-gray-200">
-                                    <img src="{{ asset('Logo.png') }}" class="w-full h-full object-contain">
+                                    <img src="{{ \App\Models\Setting::get('logo') ? asset('uploads/' . \App\Models\Setting::get('logo')) : asset('Logo.png') }}"
+                                        class="w-full h-full object-contain">
                                 </div>
-                                <button type="button"
-                                    @click="toastMessage = 'Membuka dialog upload gambar...'; showToast = true; setTimeout(() => showToast = false, 3000)"
-                                    class="px-4 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors">Ganti
+                                <input type="file" name="logo" id="logo-input" class="hidden"
+                                    onchange="document.getElementById('logo-file-name').textContent = this.files[0].name">
+                                <button type="button" onclick="document.getElementById('logo-input').click()"
+                                    class="px-4 py-2 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors">Pilih
                                     Logo</button>
+                                <span id="logo-file-name" class="text-xs text-gray-500 font-mono"></span>
                             </div>
                         </div>
                         <div class="pt-6 border-t border-gray-100">
-                            <button type="button"
-                                @click="toastMessage = 'Pengaturan umum berhasil disimpan'; showToast = true; setTimeout(() => showToast = false, 3000)"
+                            <button type="submit"
                                 class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm w-full sm:w-auto">Simpan
                                 Perubahan</button>
                         </div>
@@ -124,43 +170,52 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p class="text-sm text-[#0A2540]">Saat ini menggunakan Midtrans sebagai *payment gateway* utama.
+                        <p class="text-sm text-[#0A2540]">Saat ini menggunakan Midtrans sebagai *payment gateway*
+                            utama.
                             Pastikan Environment di set ke <strong>Sandbox</strong> saat pengembangan.</p>
                     </div>
 
-                    <form class="space-y-6 max-w-2xl">
+                    <form action="{{ route('admin.pengaturan.pembayaran') }}" method="POST"
+                        class="space-y-6 max-w-2xl">
+                        @csrf
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Midtrans Environment</label>
-                            <select
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
-                                <option value="sandbox" selected>Sandbox (Testing)</option>
-                                <option value="production">Production (Live)</option>
+                            <select name="midtrans_environment"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                required>
+                                <option value="sandbox"
+                                    {{ \App\Models\Setting::get('midtrans_environment', 'sandbox') === 'sandbox' ? 'selected' : '' }}>
+                                    Sandbox (Testing)</option>
+                                <option value="production"
+                                    {{ \App\Models\Setting::get('midtrans_environment') === 'production' ? 'selected' : '' }}>
+                                    Production (Live)</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Merchant ID</label>
-                            <input type="text" value="G45603405"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3 font-mono">
+                            <input type="text" name="midtrans_merchant_id"
+                                value="{{ \App\Models\Setting::get('midtrans_merchant_id', 'G45603405') }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3 font-mono"
+                                required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Client Key</label>
-                            <input type="text" value="SB-Mid-client-xxxxxxxxxxxx"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3 font-mono">
+                            <input type="text" name="midtrans_client_key"
+                                value="{{ \App\Models\Setting::get('midtrans_client_key', 'SB-Mid-client-xxxxxxxxxxxx') }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3 font-mono"
+                                required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Server Key</label>
-                            <input type="password" value="SB-Mid-server-xxxxxxxxxxxx"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3 font-mono">
+                            <input type="text" name="midtrans_server_key"
+                                value="{{ \App\Models\Setting::get('midtrans_server_key', 'SB-Mid-server-xxxxxxxxxxxx') }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3 font-mono"
+                                required>
                         </div>
                         <div class="pt-6 border-t border-gray-100 flex gap-4">
-                            <button type="button"
-                                @click="toastMessage = 'Kredensial payment gateway disimpan'; showToast = true; setTimeout(() => showToast = false, 3000)"
+                            <button type="submit"
                                 class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm flex-1 sm:flex-none">Simpan
                                 Kredensial</button>
-                            <button type="button"
-                                @click="toastMessage = 'Koneksi ke Midtrans berhasil!'; showToast = true; setTimeout(() => showToast = false, 3000)"
-                                class="px-6 py-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold rounded-xl transition-colors hidden sm:block">Test
-                                Koneksi</button>
                         </div>
                     </form>
                 </div>
@@ -169,47 +224,62 @@
                 <div x-show="activeTab === 'email'" style="display: none;" x-transition.opacity.duration.300ms>
                     <h2 class="text-xl font-bold text-gray-900 mb-6">Konfigurasi SMTP Email</h2>
 
-                    <form class="space-y-6 max-w-2xl">
+                    <form action="{{ route('admin.pengaturan.email') }}" method="POST" class="space-y-6 max-w-2xl">
+                        @csrf
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Mail Mailer</label>
-                                <input type="text" value="smtp"
-                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
+                                <input type="text" name="mail_mailer"
+                                    value="{{ \App\Models\Setting::get('mail_mailer', 'smtp') }}"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                    required>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Mail Host</label>
-                                <input type="text" value="smtp.gmail.com"
-                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
+                                <input type="text" name="mail_host"
+                                    value="{{ \App\Models\Setting::get('mail_host', 'smtp.gmail.com') }}"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                    required>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Mail Port</label>
-                                <input type="text" value="465"
-                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
+                                <input type="text" name="mail_port"
+                                    value="{{ \App\Models\Setting::get('mail_port', '465') }}"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                    required>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Mail Encryption</label>
-                                <select
-                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
-                                    <option value="tls">TLS</option>
-                                    <option value="ssl" selected>SSL</option>
+                                <select name="mail_encryption"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                    required>
+                                    <option value="tls"
+                                        {{ \App\Models\Setting::get('mail_encryption', 'ssl') === 'tls' ? 'selected' : '' }}>
+                                        TLS</option>
+                                    <option value="ssl"
+                                        {{ \App\Models\Setting::get('mail_encryption', 'ssl') === 'ssl' ? 'selected' : '' }}>
+                                        SSL</option>
                                 </select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Mail Username</label>
-                            <input type="email" value="adhyaksa209@gmail.com"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
+                            <input type="email" name="mail_username"
+                                value="{{ \App\Models\Setting::get('mail_username', 'adhyaksa209@gmail.com') }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Mail App Password</label>
-                            <input type="password" value="********"
-                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3">
+                            <input type="password" name="mail_password"
+                                value="{{ \App\Models\Setting::get('mail_password', 'password') }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-3"
+                                required>
                         </div>
                         <div class="pt-6 border-t border-gray-100">
-                            <button type="button"
-                                @click="toastMessage = 'Konfigurasi SMTP berhasil disimpan'; showToast = true; setTimeout(() => showToast = false, 3000)"
+                            <button type="submit"
                                 class="px-6 py-3 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm w-full sm:w-auto">Simpan
                                 Konfigurasi</button>
                         </div>

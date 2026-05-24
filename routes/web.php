@@ -36,11 +36,37 @@ Route::get('/user/poin/{slug}', [UserDashboardController::class, 'showPoinProduc
 Route::post('/user/poin/{id}/redeem', [UserDashboardController::class, 'redeemPoin'])->name('user.poin.redeem');
 Route::get('/user/bantuan', [UserDashboardController::class, 'bantuan'])->name('user.bantuan');
 
-Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-Route::get('/admin/produk', [AdminDashboardController::class, 'produk'])->name('admin.produk');
-Route::get('/admin/transaksi', [AdminDashboardController::class, 'transaksi'])->name('admin.transaksi');
-Route::get('/admin/pengguna', [AdminDashboardController::class, 'pengguna'])->name('admin.pengguna');
-Route::get('/admin/laporan', [AdminDashboardController::class, 'laporan'])->name('admin.laporan');
-Route::get('/admin/pengaturan', [AdminDashboardController::class, 'pengaturan'])->name('admin.pengaturan');
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    // Dashboard & Laporan
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/laporan', [AdminDashboardController::class, 'laporan'])->name('admin.laporan');
+    Route::get('/laporan/pdf', [AdminDashboardController::class, 'exportLaporanPdf'])->name('admin.laporan.pdf');
+
+    // CRUD Produk
+    Route::get('/produk', [AdminDashboardController::class, 'produk'])->name('admin.produk');
+    Route::post('/produk', [AdminDashboardController::class, 'storeProduct'])->name('admin.produk.store');
+    Route::post('/produk/{id}', [AdminDashboardController::class, 'updateProduct'])->name('admin.produk.update');
+    Route::delete('/produk/{id}', [AdminDashboardController::class, 'deleteProduct'])->name('admin.produk.delete');
+    Route::post('/produk/{id}/toggle-active', [AdminDashboardController::class, 'toggleProductActive'])->name('admin.produk.toggle-active');
+
+    // Transaksi
+    Route::get('/transaksi', [AdminDashboardController::class, 'transaksi'])->name('admin.transaksi');
+    Route::get('/transaksi/export', [AdminDashboardController::class, 'exportTransactionsCsv'])->name('admin.transaksi.export');
+    Route::post('/transaksi/{id}/verify', [AdminDashboardController::class, 'verifyTransaction'])->name('admin.transaksi.verify');
+    Route::post('/transaksi/{id}/reject', [AdminDashboardController::class, 'rejectTransaction'])->name('admin.transaksi.reject');
+
+    // CRUD Pengguna
+    Route::get('/pengguna', [AdminDashboardController::class, 'pengguna'])->name('admin.pengguna');
+    Route::post('/pengguna', [AdminDashboardController::class, 'storeUser'])->name('admin.pengguna.store');
+    Route::post('/pengguna/{id}', [AdminDashboardController::class, 'updateUser'])->name('admin.pengguna.update');
+    Route::delete('/pengguna/{id}', [AdminDashboardController::class, 'deleteUser'])->name('admin.pengguna.delete');
+    Route::post('/pengguna/{id}/toggle-status', [AdminDashboardController::class, 'toggleUserStatus'])->name('admin.pengguna.toggle-status');
+    
+    // Pengaturan
+    Route::get('/pengaturan', [AdminDashboardController::class, 'pengaturan'])->name('admin.pengaturan');
+    Route::post('/pengaturan/umum', [AdminDashboardController::class, 'saveSettingsUmum'])->name('admin.pengaturan.umum');
+    Route::post('/pengaturan/pembayaran', [AdminDashboardController::class, 'saveSettingsPembayaran'])->name('admin.pengaturan.pembayaran');
+    Route::post('/pengaturan/email', [AdminDashboardController::class, 'saveSettingsEmail'])->name('admin.pengaturan.email');
+});
 
 require __DIR__.'/auth.php';

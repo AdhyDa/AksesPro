@@ -11,6 +11,10 @@ class Product extends Model
         'duration_days', 'stock', 'max_stock', 'is_active', 'description'
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     protected static function boot()
     {
         parent::boot();

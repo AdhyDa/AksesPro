@@ -8,7 +8,25 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div x-data="{ search: '{{ request('search') }}', filterStatus: 'Semua Status', showToast: false, toastMessage: '' }" class="space-y-6">
+    <div x-data="{ 
+        search: '{{ request('search') }}', 
+        filterStatus: 'Semua Status', 
+        showToast: false, 
+        toastMessage: '', 
+        openAddModal: false, 
+        openEditModal: false,
+        editProduct: {
+            id: '',
+            name: '',
+            category: 'Streaming',
+            original_price: 0,
+            aksespro_price: 0,
+            duration_days: 30,
+            stock: 0,
+            max_stock: 0,
+            description: ''
+        }
+    }" class="space-y-6">
 
         <!-- Toast Notification -->
         <div x-show="showToast" x-transition:enter="transition ease-out duration-300"
@@ -34,7 +52,7 @@
             </div>
 
             <button
-                @click="toastMessage = 'Membuka form produk baru...'; showToast = true; setTimeout(() => showToast = false, 3000)"
+                @click="openAddModal = true"
                 class="px-5 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -42,6 +60,21 @@
                 Buat Produk Baru
             </button>
         </div>
+
+        @if(session('success'))
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-emerald-800">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- Filter / Search -->
         <div class="flex flex-col sm:flex-row gap-4 mb-6">
@@ -68,15 +101,17 @@
         <!-- Product Horizontal Cards List -->
         <div class="space-y-4">
             @foreach ($products as $product)
-                <div x-show="(filterStatus === 'Semua Status' || filterStatus === '{{ $product['status'] }}') && '{{ strtolower($product['name']) }}'.includes(search.toLowerCase())"
+                @php
+                    $status = !$product->is_active ? 'Nonaktif' : ($product->stock == 0 ? 'Habis' : 'Aktif');
+                @endphp
+                <div x-show="(filterStatus === 'Semua Status' || filterStatus === '{{ $status }}') && '{{ strtolower($product->name) }}'.includes(search.toLowerCase())"
                     class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row group hover:shadow-md transition-shadow">
 
                     <!-- Left: Image Area -->
-                    <div
-                        class="w-full md:w-48 lg:w-56 h-48 md:h-auto bg-gray-50 flex-shrink-0 relative border-r border-gray-100">
+                    <div class="w-full md:w-48 lg:w-56 h-48 md:h-auto bg-gray-50 flex-shrink-0 relative border-r border-gray-100">
                         <div class="absolute inset-0 flex items-center justify-center p-6">
                             @php
-                                $pName = strtolower($product['name']);
+                                $pName = strtolower($product->name);
                                 $imagePath = 'image/zoom.jpg'; // default
                                 if (str_contains($pName, 'netflix')) {
                                     $imagePath = 'image/netflix.jpg';
@@ -92,9 +127,9 @@
                                     $imagePath = 'image/zoom.jpg';
                                 } else {
                                     $imagePath = 'image/zoom.jpg';
-                                } // fallback
+                                }
                             @endphp
-                            <img src="{{ asset($imagePath) }}" alt="{{ $product['name'] }}"
+                            <img src="{{ asset($imagePath) }}" alt="{{ $product->name }}"
                                 class="w-full h-full object-contain drop-shadow-md rounded-2xl transition-transform group-hover:scale-105">
                         </div>
                     </div>
@@ -106,30 +141,38 @@
                         <div class="flex items-start justify-between gap-4 mb-4">
                             <div>
                                 <div class="flex items-center gap-2 mb-1">
-                                    <span
-                                        class="text-xs font-semibold text-[#00b8cc] bg-[#00E5FF]/10 px-2 py-0.5 rounded-md">{{ $product['category'] }}</span>
-                                    @if ($product['status'] == 'Aktif')
+                                    <span class="text-xs font-semibold text-[#00b8cc] bg-[#00E5FF]/10 px-2 py-0.5 rounded-md">{{ $product->category }}</span>
+                                    @if ($status == 'Aktif')
                                         <span class="text-xs font-semibold text-green-600">Aktif</span>
-                                    @elseif($product['status'] == 'Habis')
+                                    @elseif($status == 'Habis')
                                         <span class="text-xs font-semibold text-red-500">Stok Habis</span>
                                     @else
                                         <span class="text-xs font-semibold text-gray-500">Nonaktif</span>
                                     @endif
                                 </div>
-                                <h3 class="text-xl font-bold text-[#0A2540]">{{ $product['name'] }}</h3>
-                                <p class="text-sm text-gray-500 mt-1 line-clamp-2 max-w-xl">{{ $product['desc'] }}</p>
+                                <h3 class="text-xl font-bold text-[#0A2540]">{{ $product->name }}</h3>
+                                <p class="text-sm text-gray-500 mt-1 line-clamp-2 max-w-xl">{{ $product->description }}</p>
                             </div>
 
                             <!-- Manual Toggle Switch -->
                             <div class="flex items-center flex-shrink-0" title="Aktifkan/Nonaktifkan Manual">
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox"
-                                        @change="toastMessage = 'Status {{ $product['name'] }} diubah'; showToast = true; setTimeout(() => showToast = false, 3000)"
-                                        value="" class="sr-only peer"
-                                        {{ $product['status'] == 'Aktif' ? 'checked' : '' }}>
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0A2540]">
-                                    </div>
+                                        @change="
+                                            fetch('{{ route('admin.produk.toggle-active', $product->id) }}', {
+                                                method: 'POST',
+                                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                toastMessage = 'Status ' + '{{ $product->name }}' + ' berhasil diubah';
+                                                showToast = true;
+                                                setTimeout(() => { showToast = false; window.location.reload(); }, 1500);
+                                            });
+                                        "
+                                        class="sr-only peer"
+                                        {{ $product->is_active ? 'checked' : '' }}>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0A2540]"></div>
                                 </label>
                             </div>
                         </div>
@@ -140,36 +183,37 @@
                             <!-- Stock Progress Bar -->
                             <div class="flex-1 max-w-md">
                                 @php
-                                    $stockPercent =
-                                        $product['max_stock'] > 0
-                                            ? round(($product['stock'] / $product['max_stock']) * 100)
-                                            : 0;
-                                    $progressColor =
-                                        $stockPercent > 50
-                                            ? 'bg-[#00E5FF]'
-                                            : ($stockPercent > 20
-                                                ? 'bg-orange-400'
-                                                : 'bg-red-500');
+                                    $stockPercent = $product->max_stock > 0 ? round(($product->stock / $product->max_stock) * 100) : 0;
+                                    $progressColor = $stockPercent > 50 ? 'bg-[#00E5FF]' : ($stockPercent > 20 ? 'bg-orange-400' : 'bg-red-500');
                                 @endphp
                                 <div class="flex justify-between text-sm font-semibold mb-2">
-                                    <span class="text-gray-900">Rp {{ number_format($product['price'], 0, ',', '.') }}
+                                    <span class="text-gray-900">Rp {{ number_format($product->aksespro_price, 0, ',', '.') }}
                                         <span class="text-xs text-gray-500 font-normal">/ slot</span></span>
-                                    <span class="text-gray-600">{{ $product['stock'] }} / {{ $product['max_stock'] }}
-                                        Tersisa</span>
+                                    <span class="text-gray-600">{{ $product->stock }} / {{ $product->max_stock }} Tersisa</span>
                                 </div>
-                                <div
-                                    class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden border border-gray-200/50">
-                                    <div class="h-2.5 rounded-full {{ $progressColor }}"
-                                        style="width: {{ $stockPercent }}%"></div>
+                                <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden border border-gray-200/50">
+                                    <div class="h-2.5 rounded-full {{ $progressColor }}" style="width: {{ $stockPercent }}%"></div>
                                 </div>
-                                <p class="text-xs text-gray-400 mt-1.5">*Stok berkurang otomatis saat user transaksi.
-                                </p>
+                                <p class="text-xs text-gray-400 mt-1.5">*Stok berkurang otomatis saat user transaksi. (Modal: Rp {{ number_format($product->original_price, 0, ',', '.') }} &bull; Durasi: {{ $product->duration_days }} hari)</p>
                             </div>
 
                             <!-- Actions -->
                             <div class="flex items-center gap-2 flex-shrink-0">
                                 <button
-                                    @click="toastMessage = 'Membuka form edit untuk {{ $product['name'] }}'; showToast = true; setTimeout(() => showToast = false, 3000)"
+                                    @click="
+                                        editProduct = {
+                                            id: '{{ $product->id }}',
+                                            name: '{{ addslashes($product->name) }}',
+                                            category: '{{ addslashes($product->category) }}',
+                                            original_price: '{{ $product->original_price }}',
+                                            aksespro_price: '{{ $product->aksespro_price }}',
+                                            duration_days: '{{ $product->duration_days }}',
+                                            stock: '{{ $product->stock }}',
+                                            max_stock: '{{ $product->max_stock }}',
+                                            description: '{{ addslashes($product->description) }}'
+                                        };
+                                        openEditModal = true;
+                                    "
                                     class="px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -178,7 +222,13 @@
                                     Edit
                                 </button>
                                 <button
-                                    @click="toastMessage = 'Produk {{ $product['name'] }} berhasil dihapus'; showToast = true; setTimeout(() => showToast = false, 3000)"
+                                    @click="
+                                        if (confirm('Apakah Anda yakin ingin menghapus produk {{ $product->name }}?')) {
+                                            const form = document.getElementById('delete-form');
+                                            form.action = '/admin/produk/' + '{{ $product->id }}';
+                                            form.submit();
+                                        }
+                                    "
                                     class="p-2 bg-white border border-red-100 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
                                     title="Hapus Produk">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -191,6 +241,146 @@
                     </div>
                 </div>
             @endforeach
+        </div>
+
+        <!-- Hidden Delete Form -->
+        <form id="delete-form" action="" method="POST" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+
+        <!-- Modal: Buat Produk Baru -->
+        <div x-show="openAddModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="openAddModal = false">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <form action="{{ route('admin.produk.store') }}" method="POST">
+                        @csrf
+                        <div class="bg-white px-6 pt-6 pb-4 sm:p-6 sm:pb-4">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Buat Produk Baru</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Nama Produk</label>
+                                    <input type="text" name="name" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Kategori</label>
+                                        <select name="category" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                            <option value="Streaming">Streaming</option>
+                                            <option value="Musik">Musik</option>
+                                            <option value="Desain">Desain</option>
+                                            <option value="Produktivitas">Produktivitas</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Durasi (Hari)</label>
+                                        <input type="number" name="duration_days" value="30" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Harga Modal (Rp)</label>
+                                        <input type="number" name="original_price" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Harga Jual (Rp)</label>
+                                        <input type="number" name="aksespro_price" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Stok Saat Ini</label>
+                                        <input type="number" name="stock" value="0" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Stok Maksimum</label>
+                                        <input type="number" name="max_stock" value="100" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                                    <textarea name="description" rows="3" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-2">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-base font-bold text-white sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                            <button type="button" @click="openAddModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-200 shadow-sm px-4 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Edit Produk -->
+        <div x-show="openEditModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="openEditModal = false">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <form :action="'/admin/produk/' + editProduct.id" method="POST">
+                        @csrf
+                        <div class="bg-white px-6 pt-6 pb-4 sm:p-6 sm:pb-4">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Produk</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Nama Produk</label>
+                                    <input type="text" name="name" x-model="editProduct.name" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Kategori</label>
+                                        <select name="category" x-model="editProduct.category" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                            <option value="Streaming">Streaming</option>
+                                            <option value="Musik">Musik</option>
+                                            <option value="Desain">Desain</option>
+                                            <option value="Produktivitas">Produktivitas</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Durasi (Hari)</label>
+                                        <input type="number" name="duration_days" x-model="editProduct.duration_days" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Harga Modal (Rp)</label>
+                                        <input type="number" name="original_price" x-model="editProduct.original_price" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Harga Jual (Rp)</label>
+                                        <input type="number" name="aksespro_price" x-model="editProduct.aksespro_price" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Stok Saat Ini</label>
+                                        <input type="number" name="stock" x-model="editProduct.stock" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Stok Maksimum</label>
+                                        <input type="number" name="max_stock" x-model="editProduct.max_stock" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                                    <textarea name="description" x-model="editProduct.description" rows="3" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-2">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-base font-bold text-white sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                            <button type="button" @click="openEditModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-200 shadow-sm px-4 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
     </div>

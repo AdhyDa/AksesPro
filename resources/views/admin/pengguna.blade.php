@@ -8,7 +8,20 @@
     </x-slot>
 
     <!-- Page Content -->
-    <div x-data="{ search: '{{ request('search') }}', filterRole: 'Semua Peran', showToast: false, toastMessage: '' }" class="space-y-6">
+    <div x-data="{ 
+        search: '{{ request('search') }}', 
+        filterRole: 'Semua Peran', 
+        showToast: false, 
+        toastMessage: '',
+        openAddModal: false,
+        openEditModal: false,
+        editUser: {
+            id: '',
+            name: '',
+            email: '',
+            password: ''
+        }
+    }" class="space-y-6">
         
         <!-- Toast Notification -->
         <div x-show="showToast" 
@@ -30,11 +43,46 @@
                 <h1 class="text-2xl font-bold text-gray-900">Kelola Pengguna</h1>
                 <p class="text-sm text-gray-500 mt-1">Daftar anggota terdaftar dan riwayat aktivitas mereka.</p>
             </div>
-            <button @click="toastMessage = 'Membuka form tambah pengguna...'; showToast = true; setTimeout(() => showToast = false, 3000)" class="px-5 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
+            <button @click="openAddModal = true" class="px-5 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-white font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                 Tambah Pengguna
             </button>
         </div>
+
+        @if(session('success'))
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-emerald-800">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-red-800">Harap perbaiki kesalahan input berikut:</p>
+                    <ul class="list-disc list-inside text-xs text-red-700 mt-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- Filter / Search -->
         <div class="flex flex-col sm:flex-row gap-4">
@@ -100,11 +148,39 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center gap-2">
-                                    <button @click="toastMessage = 'Membuka profil {{ $u['name'] }}'; showToast = true; setTimeout(() => showToast = false, 3000)" class="p-2 bg-gray-50 text-gray-500 hover:bg-[#00E5FF]/10 hover:text-[#00b8cc] rounded-lg transition-colors" title="Edit Pengguna">
+                                    <button @click="
+                                        editUser = {
+                                            id: '{{ $u['id'] }}',
+                                            name: '{{ addslashes($u['name']) }}',
+                                            email: '{{ addslashes($u['email']) }}',
+                                            password: ''
+                                        };
+                                        openEditModal = true;
+                                    " class="p-2 bg-gray-50 text-gray-500 hover:bg-[#00E5FF]/10 hover:text-[#00b8cc] rounded-lg transition-colors" title="Edit Pengguna">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
-                                    <button @click="toastMessage = 'Status pengguna {{ $u['name'] }} berhasil diubah'; showToast = true; setTimeout(() => showToast = false, 3000)" class="p-2 bg-gray-50 text-gray-500 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors" title="Banned / Suspend">
+                                    <button @click="
+                                        fetch('/admin/pengguna/{{ $u['id'] }}/toggle-status', {
+                                            method: 'POST',
+                                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            toastMessage = 'Status ' + '{{ $u['name'] }}' + ' berhasil diubah';
+                                            showToast = true;
+                                            setTimeout(() => { showToast = false; window.location.reload(); }, 1500);
+                                        });
+                                    " class="p-2 bg-gray-50 text-gray-500 hover:bg-orange-100 hover:text-orange-600 rounded-lg transition-colors" title="Banned / Suspend">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                    </button>
+                                    <button @click="
+                                        if (confirm('Apakah Anda yakin ingin menghapus pengguna {{ $u['name'] }}?')) {
+                                            const form = document.getElementById('delete-user-form');
+                                            form.action = '/admin/pengguna/' + '{{ $u['id'] }}';
+                                            form.submit();
+                                        }
+                                    " class="p-2 bg-gray-50 text-gray-500 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors" title="Hapus Pengguna">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </div>
                             </td>
@@ -114,9 +190,86 @@
                 </table>
             </div>
             
-            <!-- Pagination Placeholder -->
             <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                <span class="text-sm text-gray-500">Menampilkan 1 hingga 3 dari 3 pengguna</span>
+                <span class="text-sm text-gray-500">Menampilkan {{ count($users) }} pengguna member terdaftar</span>
+            </div>
+        </div>
+
+        <!-- Hidden Delete Form -->
+        <form id="delete-user-form" action="" method="POST" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+
+        <!-- Modal: Tambah Pengguna -->
+        <div x-show="openAddModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="openAddModal = false">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <form action="{{ route('admin.pengguna.store') }}" method="POST">
+                        @csrf
+                        <div class="bg-white px-6 pt-6 pb-4 sm:p-6 sm:pb-4">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Tambah Pengguna Member</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                                    <input type="text" name="name" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Alamat Email</label>
+                                    <input type="email" name="email" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                                    <input type="password" name="password" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-2">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-base font-bold text-white sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                            <button type="button" @click="openAddModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-200 shadow-sm px-4 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Edit Pengguna -->
+        <div x-show="openEditModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="openEditModal = false">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <form :action="'/admin/pengguna/' + editUser.id" method="POST">
+                        @csrf
+                        <div class="bg-white px-6 pt-6 pb-4 sm:p-6 sm:pb-4">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Pengguna</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                                    <input type="text" name="name" x-model="editUser.name" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Alamat Email</label>
+                                    <input type="email" name="email" x-model="editUser.email" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Password Baru <span class="text-xs text-gray-400">(kosongkan jika tidak diubah)</span></label>
+                                    <input type="password" name="password" class="mt-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-[#00E5FF] focus:border-[#00E5FF] block w-full p-2.5">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-2">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2.5 bg-[#0A2540] hover:bg-[#0d2e59] text-base font-bold text-white sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
+                            <button type="button" @click="openEditModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-200 shadow-sm px-4 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">Batal</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

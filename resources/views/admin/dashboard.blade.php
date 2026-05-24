@@ -34,9 +34,9 @@
                 <select
                     @change="toastMessage = 'Memuat data untuk periode: ' + $event.target.value; showToast = true; setTimeout(() => showToast = false, 3000)"
                     class="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#00E5FF] focus:border-[#00E5FF] block px-3 py-2 pr-10">
-                    <option>Bulan Ini</option>
-                    <option>Bulan Lalu</option>
-                    <option>Tahun Ini</option>
+                    <option value="bulan-ini" {{ ($periode ?? "bulan-ini") === "bulan-ini" ? "selected" : "" }}>Bulan Ini</option>
+                    <option value="bulan-lalu" {{ ($periode ?? "") === "bulan-lalu" ? "selected" : "" }}>Bulan Lalu</option>
+                    <option value="tahun-ini" {{ ($periode ?? "") === "tahun-ini" ? "selected" : "" }}>Tahun Ini</option
                 </select>
             </div>
         </div>
