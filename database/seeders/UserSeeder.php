@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::create([
+        User::create([
             'name' => 'Superadmin',
             'email' => 'adhyaksa209@gmail.com',
             'password' => bcrypt('akuadmin456'),
@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
             'points' => 0,
         ]);
 
-        \App\Models\User::create([
+        User::create([
             'name' => 'Adhyaksa',
             'email' => 'adhyaksa.daudi.2405336@students.um.ac.id',
             'password' => bcrypt('adhydaudi005'),

@@ -56,7 +56,7 @@ class AdminDashboardController extends Controller
             $revTrendVal = round((($revenue - $prevRevenue) / $prevRevenue) * 100);
             $revenue_trend = ($revTrendVal >= 0 ? '+' : '') . $revTrendVal . '%';
         } else {
-            $revenue_trend = '+0%';
+            $revenue_trend = $revenue > 0 ? '+100%' : '+0%';
         }
 
         // 2. Total Users
@@ -82,7 +82,7 @@ class AdminDashboardController extends Controller
             $ordersTrendVal = round((($successfulOrders - $prevSuccessfulOrders) / $prevSuccessfulOrders) * 100);
             $orders_trend = ($ordersTrendVal >= 0 ? '+' : '') . $ordersTrendVal . '%';
         } else {
-            $orders_trend = '+0%';
+            $orders_trend = $successfulOrders > 0 ? '+100%' : '+0%';
         }
 
         // 4. Complaint Tickets
@@ -108,19 +108,20 @@ class AdminDashboardController extends Controller
             'tickets_trend' => $tickets_trend,
         ];
 
-        // Recent Transactions
+        // Transaksi terbaru
         $recentTransactionsData = Transaction::with(['user', 'product'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
         $recent_transactions = [];
-        $statusMap = [
-            'pending' => 'Menunggu',
-            'success' => 'Sukses',
-            'failed' => 'Gagal'
-        ];
         foreach ($recentTransactionsData as $trx) {
+            $statusMap = [
+                'pending' => 'Menunggu',
+                'success' => 'Sukses',
+                'failed' => 'Gagal'
+            ];
+            
             $recent_transactions[] = [
                 'user' => $trx->user ? $trx->user->name : 'N/A',
                 'product' => $trx->product ? $trx->product->name : 'N/A',
@@ -130,40 +131,116 @@ class AdminDashboardController extends Controller
             ];
         }
 
-        // Chart Data
+        // Chart Data - Dynamic based on period
         $chartData = [];
         $chartLabels = [];
-
+        
         if ($periode === 'tahun-ini') {
+            // Monthly for the current year (Jan - Dec)
             for ($m = 1; $m <= 12; $m++) {
-                $monthDate = now()->month($m);
+                $monthObj = now()->month($m);
+                // Skip future months in current year to keep graph clean
+                if ($monthObj->isFuture() && $monthObj->year === now()->year) {
+                    continue;
+                }
                 $monthRevenue = Transaction::where('status', 'success')
                     ->whereYear('created_at', now()->year)
                     ->whereMonth('created_at', $m)
                     ->sum('total_amount');
-                $chartLabels[] = $monthDate->translatedFormat('M');
-                $chartData[] = round($monthRevenue / 1000000, 2);
-            }
-        } else {
-            $daysInMonth = $endDate->day;
-            for ($d = 1; $d <= $daysInMonth; $d++) {
-                $dayDate = clone $startDate;
-                $dayDate->day($d);
                 
+                $chartLabels[] = $monthObj->translatedFormat('M');
+                $chartData[] = (int)$monthRevenue;
+            }
+        } elseif ($periode === 'bulan-lalu') {
+            // Daily for last month
+            $lastMonth = now()->subMonth();
+            $daysInMonth = $lastMonth->daysInMonth;
+            for ($d = 1; $d <= $daysInMonth; $d++) {
                 $dayRevenue = Transaction::where('status', 'success')
-                    ->whereDate('created_at', $dayDate->toDateString())
+                    ->whereYear('created_at', $lastMonth->year)
+                    ->whereMonth('created_at', $lastMonth->month)
+                    ->whereDay('created_at', $d)
                     ->sum('total_amount');
                 
-                $chartLabels[] = $d;
-                $chartData[] = round($dayRevenue / 1000000, 2);
+                $chartLabels[] = str_pad($d, 2, '0', STR_PAD_LEFT);
+                $chartData[] = (int)$dayRevenue;
+            }
+        } else { // bulan-ini
+            // Daily for this month
+            $daysInMonth = now()->daysInMonth;
+            for ($d = 1; $d <= $daysInMonth; $d++) {
+                $dayRevenue = Transaction::where('status', 'success')
+                    ->whereYear('created_at', now()->year)
+                    ->whereMonth('created_at', now()->month)
+                    ->whereDay('created_at', $d)
+                    ->sum('total_amount');
+                
+                $chartLabels[] = str_pad($d, 2, '0', STR_PAD_LEFT);
+                $chartData[] = (int)$dayRevenue;
             }
         }
 
-        // Reverse to match view's array_reverse
-        $chartLabels = array_reverse($chartLabels);
-        $chartData = array_reverse($chartData);
+        // Kategori Produk Terlaris (Doughnut Chart) filtered by period
+        $categoriesDataQuery = Transaction::join('products', 'transactions.product_id', '=', 'products.id')
+            ->where('transactions.status', 'success')
+            ->whereBetween('transactions.created_at', [$startDate, $endDate])
+            ->selectRaw('products.category, count(*) as total')
+            ->groupBy('products.category')
+            ->get();
 
-        return view('admin.dashboard', compact('admin', 'stats', 'recent_transactions', 'chartLabels', 'chartData', 'periode'));
+        $categoryLabels = [];
+        $categoryData = [];
+        foreach ($categoriesDataQuery as $catRow) {
+            $categoryLabels[] = $catRow->category;
+            $categoryData[] = $catRow->total;
+        }
+
+        if (empty($categoryLabels)) {
+            $categoryLabels = ['Streaming', 'Musik', 'Desain', 'Produktivitas'];
+            $categoryData = [0, 0, 0, 0];
+        }
+
+        // Pengguna baru terdaftar
+        $recentUsersData = User::where('role', 'member')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        $recentUsers = [];
+        foreach ($recentUsersData as $usr) {
+            $recentUsers[] = [
+                'name' => $usr->name,
+                'email' => $usr->email,
+                'points' => $usr->points,
+                'date' => $usr->created_at->format('d M Y'),
+                'status' => 'Aktif',
+            ];
+        }
+
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'stats' => $stats,
+                'recent_transactions' => $recent_transactions,
+                'chartLabels' => $chartLabels,
+                'chartData' => $chartData,
+                'categoryLabels' => $categoryLabels,
+                'categoryData' => $categoryData,
+                'recentUsers' => $recentUsers,
+                'periode' => $periode,
+            ]);
+        }
+
+        return view('admin.dashboard', compact(
+            'admin', 
+            'stats', 
+            'recent_transactions', 
+            'chartLabels', 
+            'chartData', 
+            'categoryLabels', 
+            'categoryData',
+            'recentUsers',
+            'periode'
+        ));
     }
 
     public function produk()

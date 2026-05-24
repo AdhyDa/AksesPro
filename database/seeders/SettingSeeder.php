@@ -10,9 +10,9 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         Setting::set('system_name', 'AksesPro');
-        Setting::set('system_description', 'Akses instan layanan streaming premium, musik, desain, dan produktivitas terbaik.');
-        Setting::set('logo', 'logo.png');
-        
+        Setting::set('system_description', 'Hentikan pemborosan biaya langganan. Bergabung dengan sistem patungan yang aman, legal & bergaransi — hemat hingga 80% dari harga resmi.');
+        Setting::set('logo', 'Logo.png');
+
         Setting::set('midtrans_merchant_id', 'G123456789');
         Setting::set('midtrans_client_key', 'SB-Mid-client-dummyClientKey123');
         Setting::set('midtrans_server_key', 'SB-Mid-server-dummyServerKey456');
