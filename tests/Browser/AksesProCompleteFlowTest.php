@@ -76,8 +76,8 @@ class AksesProCompleteFlowTest extends DuskTestCase
                     ->pause(2000)
 
                     // Klik "Beli Sekarang" di halaman rincian produk untuk diarahkan ke halaman checkout
-                    ->waitFor('form[action*="checkout/process"] button[type="submit"]', 10)
-                    ->click('form[action*="checkout/process"] button[type="submit"]')
+                    ->waitFor('form[action*="checkout"] button[type="submit"]', 10)
+                    ->click('form[action*="checkout"] button[type="submit"]')
                     ->pause(2000)
                     
                     // 7. Di halaman checkout review, klik "Bayar Sekarang" untuk memicu Midtrans Snap
