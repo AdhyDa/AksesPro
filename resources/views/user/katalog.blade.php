@@ -54,41 +54,16 @@
                     <!-- Top / Banner Part -->
                     <div class="h-24 bg-gray-200 relative flex justify-end p-4">
                         <!-- Discount Badge -->
-                        @if ($product->original_price)
-                            @php
-                                $discount = round(
-                                    (($product->original_price - $product->aksespro_price) / $product->original_price) *
-                                        100,
-                                );
-                            @endphp
+                        @if ($product->original_price && $product->savings_percentage > 0)
                             <div
-                                class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                                Hemat {{ $discount }}%
+                                class="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                                Hemat {{ $product->savings_percentage }}%
                             </div>
                         @endif
                         <!-- Icon / Initial -->
                         <div
                             class="absolute -bottom-8 left-6 w-16 h-16 bg-white rounded-xl flex items-center justify-center overflow-hidden group-hover:-translate-y-1 transition-transform">
-                            @php
-                                $pName = strtolower($product->name);
-                                $imagePath = 'image/zoom.jpg'; // default
-                                if (str_contains($pName, 'netflix')) {
-                                    $imagePath = 'image/netflix.jpg';
-                                } elseif (str_contains($pName, 'spotify')) {
-                                    $imagePath = 'image/spotify.jpg';
-                                } elseif (str_contains($pName, 'canva')) {
-                                    $imagePath = 'image/canva.jpg';
-                                } elseif (str_contains($pName, 'youtube')) {
-                                    $imagePath = 'image/youtube.webp';
-                                } elseif (str_contains($pName, 'chatgpt')) {
-                                    $imagePath = 'image/chatgpt.jpg';
-                                } elseif (str_contains($pName, 'zoom')) {
-                                    $imagePath = 'image/zoom.jpg';
-                                } else {
-                                    $imagePath = 'image/zoom.jpg';
-                                } // fallback
-                            @endphp
-                            <img src="{{ asset($imagePath) }}" alt="{{ $product->name }}"
+                            <img src="{{ asset($product->logo_path) }}" alt="{{ $product->name }}"
                                 class="w-full h-full object-contain rounded-lg">
                         </div>
                     </div>
@@ -114,10 +89,10 @@
                         <div class="mt-auto pt-4 border-t border-gray-50 flex items-end justify-between">
                             <div>
                                 @if ($product->original_price)
-                                    <p class="text-xs text-gray-400 line-through">Rp
+                                    <p class="line-through text-gray-400 text-sm">Rp
                                         {{ number_format($product->original_price, 0, ',', '.') }}</p>
                                 @endif
-                                <p class="text-xl font-black text-[#0A2540]">Rp
+                                <p class="text-xl font-bold text-slate-900">Rp
                                     {{ number_format($product->aksespro_price, 0, ',', '.') }}</p>
                             </div>
                             <a href="{{ route('user.katalog.detail', $product->slug) }}"

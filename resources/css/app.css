@@ -202,7 +202,7 @@
       animation: marquee 28s linear infinite;
     }
     .marquee-track:hover {
-      animation-play-state: paused;
+      animation-play-state: running !important;
     }
 
     /* Mobile nav */
@@ -290,4 +290,13 @@
     .stat-item {
       text-align: center;
     }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }

@@ -264,26 +264,7 @@
                                 <td class="px-6 py-4 font-semibold text-gray-900 flex items-center gap-3">
                                     <div
                                         class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center overflow-hidden">
-                                        @php
-                                            $pName = strtolower($sub['name']);
-                                            $imagePath = 'image/zoom.jpg'; // default
-                                            if (str_contains($pName, 'netflix')) {
-                                                $imagePath = 'image/netflix.jpg';
-                                            } elseif (str_contains($pName, 'spotify')) {
-                                                $imagePath = 'image/spotify.jpg';
-                                            } elseif (str_contains($pName, 'canva')) {
-                                                $imagePath = 'image/canva.jpg';
-                                            } elseif (str_contains($pName, 'youtube')) {
-                                                $imagePath = 'image/youtube.webp';
-                                            } elseif (str_contains($pName, 'chatgpt')) {
-                                                $imagePath = 'image/chatgpt.jpg';
-                                            } elseif (str_contains($pName, 'zoom')) {
-                                                $imagePath = 'image/zoom.jpg';
-                                            } else {
-                                                $imagePath = 'image/zoom.jpg';
-                                            } // fallback
-                                        @endphp
-                                        <img src="{{ asset($imagePath) }}" alt="{{ $sub['name'] }}"
+                                        <img src="{{ asset($sub['logo_path']) }}" alt="{{ $sub['name'] }}"
                                             class="w-full h-full object-contain rounded-lg">
                                     </div>
                                     {{ $sub['name'] }}

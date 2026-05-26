@@ -39,26 +39,7 @@
 
                     <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
                         <div class="w-20 h-20 bg-white rounded-2xl shadow-lg flex-shrink-0">
-                            @php
-                                $pName = strtolower($product->name);
-                                $imagePath = 'image/zoom.jpg'; // default
-                                if (str_contains($pName, 'netflix')) {
-                                    $imagePath = 'image/netflix.jpg';
-                                } elseif (str_contains($pName, 'spotify')) {
-                                    $imagePath = 'image/spotify.jpg';
-                                } elseif (str_contains($pName, 'canva')) {
-                                    $imagePath = 'image/canva.jpg';
-                                } elseif (str_contains($pName, 'youtube')) {
-                                    $imagePath = 'image/youtube.webp';
-                                } elseif (str_contains($pName, 'chatgpt')) {
-                                    $imagePath = 'image/chatgpt.jpg';
-                                } elseif (str_contains($pName, 'zoom')) {
-                                    $imagePath = 'image/zoom.jpg';
-                                } else {
-                                    $imagePath = 'image/zoom.jpg';
-                                } // fallback
-                            @endphp
-                            <img src="{{ asset($imagePath) }}" alt="{{ $product->name }}"
+                            <img src="{{ asset($product->logo_path) }}" alt="{{ $product->name }}"
                                 class="w-full h-full object-contain rounded-xl">
                         </div>
 

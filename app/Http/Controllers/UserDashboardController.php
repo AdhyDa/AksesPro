@@ -56,6 +56,7 @@ class UserDashboardController extends Controller
                 'end_date' => $sub->end_date->format('Y-m-d'),
                 'status' => 'Aktif', // we filter by active anyway
                 'product_slug' => $sub->product->slug,
+                'logo_path' => $sub->product->logo_path,
             ];
         }
 
@@ -112,6 +113,7 @@ class UserDashboardController extends Controller
                 'status' => ucfirst($sub->status),
                 'auto_renew' => $sub->auto_renew,
                 'product_slug' => $sub->product->slug,
+                'logo_path' => $sub->product->logo_path,
             ];
         }
 

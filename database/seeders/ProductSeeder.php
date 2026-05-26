@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Product;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -12,77 +14,149 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Product::insert([
-            [
-                'name' => 'Netflix Premium 1 Bulan',
-                'slug' => 'netflix-premium-1-bulan',
-                'category' => 'Streaming',
-                'original_price' => 65000,
-                'aksespro_price' => 18500,
-                'duration_days' => 30,
-                'stock' => 15,
-                'max_stock' => 20,
-                'is_active' => true,
-                'description' => 'Akun sharing 1 profile 1 device. Resolusi 4K UHD. Garansi penuh 1 bulan.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Spotify Family 1 Bulan',
-                'slug' => 'spotify-family-1-bulan',
-                'category' => 'Musik',
-                'original_price' => 86900,
-                'aksespro_price' => 18000,
-                'duration_days' => 30,
-                'stock' => 10,
-                'max_stock' => 10,
-                'is_active' => true,
-                'description' => 'Invite via link family. Akun private region Indonesia. Anti banned.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Canva Pro 1 Tahun',
-                'slug' => 'canva-pro-1-tahun',
-                'category' => 'Desain',
-                'original_price' => 1000000,
-                'aksespro_price' => 8000,
-                'duration_days' => 365,
-                'stock' => 50,
-                'max_stock' => 50,
-                'is_active' => true,
-                'description' => 'Invite tim Canva Pro. Semua fitur premium terbuka. Legal 100%.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'YouTube Premium 1 Bulan',
-                'slug' => 'youtube-premium-1-bulan',
-                'category' => 'Streaming',
-                'original_price' => 139000,
-                'aksespro_price' => 4500,
-                'duration_days' => 30,
-                'stock' => 5,
-                'max_stock' => 10,
-                'is_active' => true,
-                'description' => 'Invite family. Bebas iklan, YouTube Music premium.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'ChatGPT Plus 1 Bulan',
-                'slug' => 'chatgpt-plus-1-bulan',
-                'category' => 'Produktivitas',
-                'original_price' => 350000,
-                'aksespro_price' => 31000,
-                'duration_days' => 30,
-                'stock' => 8,
-                'max_stock' => 15,
-                'is_active' => true,
-                'description' => 'Akun sharing bergaransi. Akses fitur GPT-4 dan prioritas akses.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
+        Schema::disableForeignKeyConstraints();
+        Product::truncate();
+        Schema::enableForeignKeyConstraints();
+
+        // Load unified researched prices and products from harga_resmi.csv
+        $researchPath = base_path('harga_resmi.csv');
+        if (! file_exists($researchPath)) {
+            $this->command->error("CSV file not found at: {$researchPath}");
+
+            return;
+        }
+
+        if (($handle = fopen($researchPath, 'r')) !== false) {
+            $lineCount = 0;
+            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                $lineCount++;
+                // Skip the first 4 lines (title, subtitle, blank, column header)
+                if ($lineCount <= 4) {
+                    continue;
+                }
+
+                // Skip empty or malformed rows
+                if (empty($row) || ! isset($row[0]) || trim($row[0]) === '') {
+                    continue;
+                }
+
+                $name = trim($row[0]);
+
+                // Get AksesPro price from Column Index 1
+                if (! isset($row[1]) || trim($row[1]) === '') {
+                    continue;
+                }
+                $aksesproPrice = $this->cleanPrice($row[1]);
+                if ($aksesproPrice <= 0) {
+                    continue;
+                }
+
+                // Get official researched price from Column Index 3
+                $officialPriceStr = $row[3] ?? '';
+                $originalPrice = $this->parseOfficialPrice($officialPriceStr, $aksesproPrice);
+
+                $category = $this->estimateCategory($name);
+                $durationDays = $this->parseDurationDays($name);
+
+                Product::create([
+                    'name' => $name,
+                    'slug' => Str::slug($name),
+                    'category' => $category,
+                    'original_price' => $originalPrice,
+                    'aksespro_price' => $aksesproPrice,
+                    'duration_days' => $durationDays,
+                    'stock' => 20,
+                    'max_stock' => 20,
+                    'is_active' => true,
+                    'description' => "Akses premium {$name}. Bergaransi penuh dan legal 100% dari AksesPro.",
+                ]);
+            }
+            fclose($handle);
+        }
+    }
+
+    /**
+     * Clean and parse regular price strings.
+     */
+    private function cleanPrice(string $priceStr): int
+    {
+        if (preg_match('/Rp\s*([\d\.,]+)/i', $priceStr, $matches)) {
+            return (int) str_replace(['.', ','], '', $matches[1]);
+        }
+
+        return (int) preg_replace('/[^0-9]/', '', $priceStr);
+    }
+
+    /**
+     * Parse official price string into integer with fallback.
+     */
+    private function parseOfficialPrice(string $priceStr, int $aksesproPrice): int
+    {
+        $priceStr = trim($priceStr);
+        if ($priceStr === '' || str_contains(strtolower($priceStr), 'tidak tersedia')) {
+            // Default fallback is 4 * aksespro_price
+            return $aksesproPrice * 4;
+        }
+
+        // Match the first numeric sequence after "Rp"
+        if (preg_match('/Rp\s*([\d\.,]+)/i', $priceStr, $matches)) {
+            $cleanNum = str_replace(['.', ','], '', $matches[1]);
+
+            return (int) $cleanNum;
+        }
+
+        // Default fallback if matching fails
+        return $aksesproPrice * 4;
+    }
+
+    /**
+     * Estimate category based on product name.
+     */
+    private function estimateCategory(string $productName): string
+    {
+        $upperName = strtoupper($productName);
+
+        if (str_contains($upperName, 'CANVA') || str_contains($upperName, 'CAPCUT') || str_contains($upperName, 'PICSART') || str_contains($upperName, 'REMINI')) {
+            return 'Desain';
+        }
+
+        if (str_contains($upperName, 'APPLE MUSIC') || str_contains($upperName, 'SPOTIFY')) {
+            return 'Musik';
+        }
+
+        if (str_contains($upperName, 'CHATGPT') || str_contains($upperName, 'ZOOM') || str_contains($upperName, 'NOTION') || str_contains($upperName, 'OFFICE')) {
+            return 'Produktivitas';
+        }
+
+        return 'Streaming';
+    }
+
+    /**
+     * Parse duration in days.
+     */
+    private function parseDurationDays(string $productName): int
+    {
+        $upperName = strtoupper($productName);
+
+        if (str_contains($upperName, 'LIFETIME')) {
+            return 9999;
+        }
+
+        // Check for 'hari' / 'days'
+        if (preg_match('/(\d+)\s*(?:HARI|DAY|DAYS)/', $upperName, $matches)) {
+            return (int) $matches[1];
+        }
+
+        // Check for 'bln' / 'bulan' / 'month'
+        if (preg_match('/(\d+)\s*(?:BLN|BULAN|MONTH|MONTHS)/', $upperName, $matches)) {
+            return (int) $matches[1] * 30;
+        }
+
+        // Check for 'thn' / 'tahun' / 'yr' / 'year'
+        if (preg_match('/(\d+)\s*(?:THN|TAHUN|YR|YEAR|YEARS)/', $upperName, $matches)) {
+            return (int) $matches[1] * 365;
+        }
+
+        return 30; // Default fallback to 30 days
     }
 }

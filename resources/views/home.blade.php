@@ -123,74 +123,237 @@
         <div class="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style="background: linear-gradient(to right, white, transparent);"></div>
         <div class="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style="background: linear-gradient(to left, white, transparent);"></div>
 
-        <div class="marquee-track gap-6 py-4 reveal">
+        <div class="marquee-track gap-6 py-4 reveal" style="pointer-events: none !important;">
+          @php
+            $uniqueProducts = $products->unique(function ($item) {
+                $name = strtolower($item->name);
+                if (str_contains($name, 'apple')) return 'apple';
+                if (str_contains($name, 'spotify')) return 'spotify';
+                if (str_contains($name, 'canva')) return 'canva';
+                if (str_contains($name, 'capcut')) return 'capcut';
+                if (str_contains($name, 'chatgpt')) return 'chatgpt';
+                if (str_contains($name, 'bstation')) return 'bstation';
+                if (str_contains($name, 'iqiyi')) return 'iqiyi';
+                if (str_contains($name, 'remini')) return 'remini';
+                if (str_contains($name, 'viu')) return 'viu';
+                if (str_contains($name, 'wetv')) return 'wetv';
+                if (str_contains($name, 'youtube')) return 'youtube';
+                if (str_contains($name, 'zoom')) return 'zoom';
+                if (str_contains($name, 'netflix')) return 'netflix';
+                return $item->name;
+            });
+          @endphp
+
           <!-- Set 1 -->
           <div class="flex gap-6 items-center">
-            <!-- Netflix -->
-            <div class="trust-badge flex items-center gap-3 bg-[#141414] rounded-2xl px-6 py-4 min-w-max shadow-md">
-              <img src="{{ asset('image/netflix.jpg') }}" alt="Netflix" class="h-10 w-auto object-contain rounded-lg">
-              <div class="text-red-600 font-black text-2xl leading-none" style="font-family: 'Arial Black', sans-serif; letter-spacing:-1px;">NETFLIX</div>
-            </div>
-            <!-- Spotify -->
-            <div class="trust-badge flex items-center gap-3 bg-[#1DB954]/10 border border-[#1DB954]/30 rounded-2xl px-6 py-4 min-w-max">
-              <img src="{{ asset('image/spotify.jpg') }}" alt="Spotify" class="h-10 w-auto object-contain rounded-lg">
-              <span class="text-[#1DB954] font-bold text-sm">Spotify</span>
-            </div>
-            <!-- Canva -->
-            <div class="trust-badge flex items-center gap-3 bg-[#7C3AED]/10 border border-[#7C3AED]/30 rounded-2xl px-6 py-4 min-w-max">
-              <img src="{{ asset('image/canva.jpg') }}" alt="Canva" class="h-10 w-auto object-contain rounded-lg">
-              <span class="text-[#7C3AED] font-bold text-sm">Canva Pro</span>
-            </div>
-            <!-- Zoom -->
-            <div class="trust-badge flex items-center gap-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl px-6 py-4 min-w-max">
-              <img src="{{ asset('image/zoom.jpg') }}" alt="Zoom" class="h-10 w-auto object-contain rounded-lg">
-              <span class="text-blue-500 font-bold text-sm">Zoom Pro</span>
-            </div>
-            <!-- ChatGPT -->
-            <div class="trust-badge flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl px-6 py-4 min-w-max">
-              <img src="{{ asset('image/chatgpt.jpg') }}" alt="ChatGPT" class="h-10 w-auto object-contain rounded-lg">
-              <span class="text-emerald-500 font-bold text-sm">ChatGPT Plus</span>
-            </div>
-            <!-- YouTube Premium -->
-            <div class="trust-badge flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl px-6 py-4 min-w-max">
-              <img src="{{ asset('image/youtube.webp') }}" alt="YouTube" class="h-10 w-auto object-contain rounded-lg">
-              <span class="text-red-500 font-bold text-sm">YouTube Premium</span>
-            </div>
+            @foreach ($uniqueProducts as $item)
+              @php
+                $pName = strtolower($item->name);
+                $brandName = '';
+                $bgClass = '';
+                $borderClass = '';
+                $textClass = '';
+                $fontStyle = '';
+                $logo = $item->logo_path;
+
+                if (str_contains($pName, 'netflix')) {
+                    $brandName = 'NETFLIX';
+                    $bgClass = 'bg-gradient-to-br from-[#2b080c] to-[#0f0203]';
+                    $borderClass = 'border-[#e50914]/40';
+                    $textClass = 'text-[#e50914]';
+                    $fontStyle = "font-family: 'Impact', 'Arial Black', sans-serif; letter-spacing: -1px; font-weight: 900; text-shadow: 0 0 12px rgba(229, 9, 20, 0.55);";
+                } elseif (str_contains($pName, 'spotify')) {
+                    $brandName = 'Spotify';
+                    $bgClass = 'bg-gradient-to-br from-[#0c2e17] to-[#050f09]';
+                    $borderClass = 'border-[#1DB954]/40';
+                    $textClass = 'text-[#1DB954]';
+                    $fontStyle = "font-family: 'Circular', 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 0 10px rgba(29, 185, 84, 0.4);";
+                } elseif (str_contains($pName, 'canva')) {
+                    $brandName = 'Canva';
+                    $bgClass = 'bg-gradient-to-br from-[#200b3b] to-[#0a0414]';
+                    $borderClass = 'border-[#7C3AED]/40';
+                    $textClass = 'text-[#00C4CC]';
+                    $fontStyle = "font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; text-shadow: 0 0 10px rgba(0, 196, 204, 0.4);";
+                } elseif (str_contains($pName, 'capcut')) {
+                    $brandName = 'CapCut';
+                    $bgClass = 'bg-gradient-to-br from-[#0f2336] to-[#050d14]';
+                    $borderClass = 'border-[#00F0FF]/40';
+                    $textClass = 'text-[#00F0FF]';
+                    $fontStyle = "font-family: 'Inter', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);";
+                } elseif (str_contains($pName, 'chatgpt')) {
+                    $brandName = 'ChatGPT';
+                    $bgClass = 'bg-gradient-to-br from-[#08241c] to-[#030d0a]';
+                    $borderClass = 'border-[#10a37f]/40';
+                    $textClass = 'text-[#10a37f]';
+                    $fontStyle = "font-family: monospace; font-weight: 700; text-shadow: 0 0 10px rgba(16, 163, 127, 0.4);";
+                } elseif (str_contains($pName, 'youtube')) {
+                    $brandName = 'YouTube';
+                    $bgClass = 'bg-gradient-to-br from-[#330505] to-[#0d0101]';
+                    $borderClass = 'border-red-600/40';
+                    $textClass = 'text-white';
+                    $fontStyle = "font-family: 'Oswald', 'Arial Black', sans-serif; font-weight: 900; letter-spacing: -0.8px; text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);";
+                } elseif (str_contains($pName, 'apple')) {
+                    $brandName = 'Apple Music';
+                    $bgClass = 'bg-gradient-to-br from-[#3b0818] to-[#0f0105]';
+                    $borderClass = 'border-[#FA243C]/40';
+                    $textClass = 'text-[#FA243C]';
+                    $fontStyle = "font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; text-shadow: 0 0 10px rgba(250, 36, 60, 0.4);";
+                } elseif (str_contains($pName, 'bstation')) {
+                    $brandName = 'Bstation';
+                    $bgClass = 'bg-gradient-to-br from-[#051c36] to-[#010912]';
+                    $borderClass = 'border-[#00AEEC]/40';
+                    $textClass = 'text-[#00AEEC]';
+                    $fontStyle = "font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(0, 174, 236, 0.4);";
+                } elseif (str_contains($pName, 'iqiyi')) {
+                    $brandName = 'iQIYI';
+                    $bgClass = 'bg-gradient-to-br from-[#052912] to-[#010d05]';
+                    $borderClass = 'border-[#00FF66]/40';
+                    $textClass = 'text-[#00FF66]';
+                    $fontStyle = "font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 900; font-style: italic; text-shadow: 0 0 10px rgba(0, 255, 102, 0.4);";
+                } elseif (str_contains($pName, 'remini')) {
+                    $brandName = 'Remini';
+                    $bgClass = 'bg-gradient-to-br from-[#3b0d0d] to-[#120303]';
+                    $borderClass = 'border-[#FF4D4D]/40';
+                    $textClass = 'text-[#FF4D4D]';
+                    $fontStyle = "font-family: 'Futura', sans-serif; font-weight: 700; text-shadow: 0 0 10px rgba(255, 77, 77, 0.4);";
+                } elseif (str_contains($pName, 'viu')) {
+                    $brandName = 'Viu';
+                    $bgClass = 'bg-gradient-to-br from-[#1e073b] to-[#070112]';
+                    $borderClass = 'border-[#FFCC00]/40';
+                    $textClass = 'text-[#FFCC00]';
+                    $fontStyle = "font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);";
+                } elseif (str_contains($pName, 'wetv')) {
+                    $brandName = 'WeTV';
+                    $bgClass = 'bg-gradient-to-br from-[#361303] to-[#0a0301]';
+                    $borderClass = 'border-[#FF5C00]/40';
+                    $textClass = 'text-[#FF5C00]';
+                    $fontStyle = "font-family: 'Montserrat', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(255, 92, 0, 0.4);";
+                } elseif (str_contains($pName, 'zoom')) {
+                    $brandName = 'Zoom';
+                    $bgClass = 'bg-gradient-to-br from-[#052147] to-[#010914]';
+                    $borderClass = 'border-[#2D8CFF]/40';
+                    $textClass = 'text-[#2D8CFF]';
+                    $fontStyle = "font-family: sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(45, 140, 255, 0.4);";
+                } else {
+                    $brandName = $item->name;
+                    $bgClass = 'bg-gradient-to-br from-[#1c1c1c] to-[#0a0a0a]';
+                    $borderClass = 'border-gray-500/30';
+                    $textClass = 'text-white';
+                    $fontStyle = "font-family: sans-serif; font-weight: 700;";
+                }
+              @endphp
+
+              <div class="trust-badge flex items-center gap-3 {{ $bgClass }} border {{ $borderClass }} rounded-2xl px-6 py-4 min-w-max shadow-md transition-transform duration-300">
+                <img src="{{ asset($logo) }}" alt="{{ $brandName }}" class="h-10 w-auto object-contain rounded-lg">
+                <span class="{{ $textClass }} text-xl font-bold" style="{{ $fontStyle }}">{{ $brandName }}</span>
+              </div>
+            @endforeach
           </div>
 
           <!-- Set 2 (duplicate for seamless loop) -->
           <div class="flex gap-6 items-center" aria-hidden="true">
-            <div class="trust-badge flex items-center gap-3 bg-[#141414] rounded-2xl px-6 py-4 min-w-max shadow-md">
-              <div class="text-red-600 font-black text-2xl leading-none" style="font-family: 'Arial Black', sans-serif; letter-spacing:-1px;">NETFLIX</div>
-            </div>
-            <div class="trust-badge flex items-center gap-3 bg-[#1DB954]/10 border border-[#1DB954]/30 rounded-2xl px-6 py-4 min-w-max">
-              <svg class="w-6 h-6 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-              <span class="text-[#1DB954] font-bold text-sm">Spotify</span>
-            </div>
-            <div class="trust-badge flex items-center gap-3 bg-[#7C3AED]/10 border border-[#7C3AED]/30 rounded-2xl px-6 py-4 min-w-max">
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="#7C3AED"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-.459 17.564c-1.098 0-2.025-.384-2.781-1.152-.756-.768-1.134-1.739-1.134-2.913 0-1.188.384-2.163 1.152-2.925.768-.762 1.749-1.143 2.943-1.143 1.056 0 1.959.309 2.709.927l-.756 1.107c-.576-.468-1.179-.702-1.809-.702-.72 0-1.32.258-1.8.774-.48.516-.72 1.161-.72 1.935 0 .786.243 1.437.729 1.953.486.516 1.095.774 1.827.774.558 0 1.176-.189 1.854-.567v-1.296h-1.512v-1.269h2.952v3.213c-.918.723-1.908 1.284-2.654 1.284z"/></svg>
-              <span class="text-[#7C3AED] font-bold text-sm">Canva Pro</span>
-            </div>
-            <div class="trust-badge flex items-center gap-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl px-6 py-4 min-w-max">
-              <svg class="w-6 h-6 text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12c0 6.627-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0s12 5.373 12 12zM5.999 8.5a.5.5 0 00-.5.5v6a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V9a.5.5 0 00-.5-.5H6zm2.751 0v7h5.25V8.5h-5.25zm7.5 1.5a.25.25 0 00-.25.25v4a.25.25 0 00.384.211l2.999-2a.25.25 0 000-.422l-2.999-2a.25.25 0 00-.134-.039z"/></svg>
-              <span class="text-blue-500 font-bold text-sm">Zoom Pro</span>
-            </div>
-            <div class="trust-badge flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl px-6 py-4 min-w-max">
-              <svg class="w-6 h-6 text-emerald-500" viewBox="0 0 24 24" fill="currentColor"><path d="M22.282 9.821a5.985 5.985 0 00-.516-4.91 6.046 6.046 0 00-6.51-2.9A6.065 6.065 0 004.981 4.18a5.985 5.985 0 00-3.998 2.9 6.046 6.046 0 00.743 7.097 5.98 5.98 0 00.51 4.911 6.051 6.051 0 006.515 2.9A5.985 5.985 0 0013.26 24a6.056 6.056 0 005.772-4.206 5.99 5.99 0 003.997-2.9 6.056 6.056 0 00-.747-7.073zM13.26 22.43a4.476 4.476 0 01-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 00.392-.681v-6.737l2.02 1.168a.071.071 0 01.038.052v5.583a4.504 4.504 0 01-4.494 4.494zM3.6 18.304a4.47 4.47 0 01-.535-3.014l.142.085 4.783 2.759a.771.771 0 00.78 0l5.843-3.369v2.332a.08.08 0 01-.033.062L9.74 19.95a4.5 4.5 0 01-6.14-1.646zM2.34 7.896a4.485 4.485 0 012.366-1.973V11.6a.766.766 0 00.388.676l5.815 3.355-2.02 1.168a.076.076 0 01-.071 0L4.06 13.6a4.501 4.501 0 01-1.72-5.704zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 01.071 0l4.766 2.756a4.501 4.501 0 01-.692 8.12v-5.678a.79.79 0 00-.387-.647zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 00-.785 0L9.409 9.23V6.897a.066.066 0 01.028-.061l4.766-2.752a4.5 4.5 0 016.693 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 01-.038-.057V6.075a4.5 4.5 0 017.375-3.453l-.142.08-4.778 2.758a.795.795 0 00-.393.681l-.004 6.737zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5-.005-2.999z"/></svg>
-              <span class="text-emerald-500 font-bold text-sm">ChatGPT Plus</span>
-            </div>
-            <div class="trust-badge flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl px-6 py-4 min-w-max">
-              <svg class="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-              <span class="text-red-500 font-bold text-sm">YouTube Premium</span>
-            </div>
-            <div class="trust-badge flex items-center gap-3 bg-green-600/10 border border-green-600/30 rounded-2xl px-6 py-4 min-w-max">
-              <svg class="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.372 0 0 5.373 0 12s5.372 12 12 12 12-5.373 12-12S18.628 0 12 0zm0 4.714a7.286 7.286 0 110 14.572A7.286 7.286 0 0112 4.714zm-1.143 3.429v3.857h4.572v1.714h-4.572v.858h5.143v1.714H9.143v-8.143h1.714z"/></svg>
-              <span class="text-green-600 font-bold text-sm">Grammarly</span>
-            </div>
-            <div class="trust-badge flex items-center gap-3 bg-red-600/10 border border-red-600/30 rounded-2xl px-6 py-4 min-w-max">
-              <span class="text-red-600 font-black text-lg" style="font-family: 'Arial Black';">Ai</span>
-              <span class="text-red-600 font-bold text-sm">Adobe CC</span>
-            </div>
+            @foreach ($uniqueProducts as $item)
+              @php
+                $pName = strtolower($item->name);
+                $brandName = '';
+                $bgClass = '';
+                $borderClass = '';
+                $textClass = '';
+                $fontStyle = '';
+                $logo = $item->logo_path;
+
+                if (str_contains($pName, 'netflix')) {
+                    $brandName = 'NETFLIX';
+                    $bgClass = 'bg-gradient-to-br from-[#2b080c] to-[#0f0203]';
+                    $borderClass = 'border-[#e50914]/40';
+                    $textClass = 'text-[#e50914]';
+                    $fontStyle = "font-family: 'Impact', 'Arial Black', sans-serif; letter-spacing: -1px; font-weight: 900; text-shadow: 0 0 12px rgba(229, 9, 20, 0.55);";
+                } elseif (str_contains($pName, 'spotify')) {
+                    $brandName = 'Spotify';
+                    $bgClass = 'bg-gradient-to-br from-[#0c2e17] to-[#050f09]';
+                    $borderClass = 'border-[#1DB954]/40';
+                    $textClass = 'text-[#1DB954]';
+                    $fontStyle = "font-family: 'Circular', 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 0 10px rgba(29, 185, 84, 0.4);";
+                } elseif (str_contains($pName, 'canva')) {
+                    $brandName = 'Canva';
+                    $bgClass = 'bg-gradient-to-br from-[#200b3b] to-[#0a0414]';
+                    $borderClass = 'border-[#7C3AED]/40';
+                    $textClass = 'text-[#00C4CC]';
+                    $fontStyle = "font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; text-shadow: 0 0 10px rgba(0, 196, 204, 0.4);";
+                } elseif (str_contains($pName, 'capcut')) {
+                    $brandName = 'CapCut';
+                    $bgClass = 'bg-gradient-to-br from-[#0f2336] to-[#050d14]';
+                    $borderClass = 'border-[#00F0FF]/40';
+                    $textClass = 'text-[#00F0FF]';
+                    $fontStyle = "font-family: 'Inter', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);";
+                } elseif (str_contains($pName, 'chatgpt')) {
+                    $brandName = 'ChatGPT';
+                    $bgClass = 'bg-gradient-to-br from-[#08241c] to-[#030d0a]';
+                    $borderClass = 'border-[#10a37f]/40';
+                    $textClass = 'text-[#10a37f]';
+                    $fontStyle = "font-family: monospace; font-weight: 700; text-shadow: 0 0 10px rgba(16, 163, 127, 0.4);";
+                } elseif (str_contains($pName, 'youtube')) {
+                    $brandName = 'YouTube';
+                    $bgClass = 'bg-gradient-to-br from-[#330505] to-[#0d0101]';
+                    $borderClass = 'border-red-600/40';
+                    $textClass = 'text-white';
+                    $fontStyle = "font-family: 'Oswald', 'Arial Black', sans-serif; font-weight: 900; letter-spacing: -0.8px; text-shadow: 0 0 10px rgba(255, 0, 0, 0.4);";
+                } elseif (str_contains($pName, 'apple')) {
+                    $brandName = 'Apple Music';
+                    $bgClass = 'bg-gradient-to-br from-[#3b0818] to-[#0f0105]';
+                    $borderClass = 'border-[#FA243C]/40';
+                    $textClass = 'text-[#FA243C]';
+                    $fontStyle = "font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; text-shadow: 0 0 10px rgba(250, 36, 60, 0.4);";
+                } elseif (str_contains($pName, 'bstation')) {
+                    $brandName = 'Bstation';
+                    $bgClass = 'bg-gradient-to-br from-[#051c36] to-[#010912]';
+                    $borderClass = 'border-[#00AEEC]/40';
+                    $textClass = 'text-[#00AEEC]';
+                    $fontStyle = "font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(0, 174, 236, 0.4);";
+                } elseif (str_contains($pName, 'iqiyi')) {
+                    $brandName = 'iQIYI';
+                    $bgClass = 'bg-gradient-to-br from-[#052912] to-[#010d05]';
+                    $borderClass = 'border-[#00FF66]/40';
+                    $textClass = 'text-[#00FF66]';
+                    $fontStyle = "font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 900; font-style: italic; text-shadow: 0 0 10px rgba(0, 255, 102, 0.4);";
+                } elseif (str_contains($pName, 'remini')) {
+                    $brandName = 'Remini';
+                    $bgClass = 'bg-gradient-to-br from-[#3b0d0d] to-[#120303]';
+                    $borderClass = 'border-[#FF4D4D]/40';
+                    $textClass = 'text-[#FF4D4D]';
+                    $fontStyle = "font-family: 'Futura', sans-serif; font-weight: 700; text-shadow: 0 0 10px rgba(255, 77, 77, 0.4);";
+                } elseif (str_contains($pName, 'viu')) {
+                    $brandName = 'Viu';
+                    $bgClass = 'bg-gradient-to-br from-[#1e073b] to-[#070112]';
+                    $borderClass = 'border-[#FFCC00]/40';
+                    $textClass = 'text-[#FFCC00]';
+                    $fontStyle = "font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);";
+                } elseif (str_contains($pName, 'wetv')) {
+                    $brandName = 'WeTV';
+                    $bgClass = 'bg-gradient-to-br from-[#361303] to-[#0a0301]';
+                    $borderClass = 'border-[#FF5C00]/40';
+                    $textClass = 'text-[#FF5C00]';
+                    $fontStyle = "font-family: 'Montserrat', sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(255, 92, 0, 0.4);";
+                } elseif (str_contains($pName, 'zoom')) {
+                    $brandName = 'Zoom';
+                    $bgClass = 'bg-gradient-to-br from-[#052147] to-[#010914]';
+                    $borderClass = 'border-[#2D8CFF]/40';
+                    $textClass = 'text-[#2D8CFF]';
+                    $fontStyle = "font-family: sans-serif; font-weight: 800; text-shadow: 0 0 10px rgba(45, 140, 255, 0.4);";
+                } else {
+                    $brandName = $item->name;
+                    $bgClass = 'bg-gradient-to-br from-[#1c1c1c] to-[#0a0a0a]';
+                    $borderClass = 'border-gray-500/30';
+                    $textClass = 'text-white';
+                    $fontStyle = "font-family: sans-serif; font-weight: 700;";
+                }
+              @endphp
+
+              <div class="trust-badge flex items-center gap-3 {{ $bgClass }} border {{ $borderClass }} rounded-2xl px-6 py-4 min-w-max shadow-md transition-transform duration-300">
+                <img src="{{ asset($logo) }}" alt="{{ $brandName }}" class="h-10 w-auto object-contain rounded-lg">
+                <span class="{{ $textClass }} text-xl font-bold" style="{{ $fontStyle }}">{{ $brandName }}</span>
+              </div>
+            @endforeach
           </div>
         </div>
       </div>
