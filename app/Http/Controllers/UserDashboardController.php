@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class UserDashboardController extends Controller
 {
@@ -10,11 +11,11 @@ class UserDashboardController extends Controller
     {
         // For development/demonstration, we fetch the first member user if not authenticated
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        
+
         $this->syncPendingTransactions($userModel);
-        
+
         $user = [
-            'name' => $userModel->fresh()->name,
+            'name'   => $userModel->fresh()->name,
             'points' => $userModel->fresh()->points,
         ];
 
@@ -31,16 +32,16 @@ class UserDashboardController extends Controller
         $userSubs = \App\Models\UserSubscription::with('product')
             ->where('user_id', $userModel->id)
             ->get();
-            
+
         foreach ($userSubs as $sub) {
             $estimatedSavings += ($sub->product->original_price - $sub->product->aksespro_price);
         }
 
         $stats = [
             'active_subscriptions' => $activeSubscriptions,
-            'total_transactions' => $totalTransactions,
-            'points_collected' => $userModel->fresh()->points,
-            'estimated_savings' => 'Rp ' . number_format($estimatedSavings, 0, ',', '.'),
+            'total_transactions'   => $totalTransactions,
+            'points_collected'     => $userModel->fresh()->points,
+            'estimated_savings'    => 'Rp ' . number_format($estimatedSavings, 0, ',', '.'),
         ];
 
         $activeSubsData = \App\Models\UserSubscription::with('product')
@@ -51,53 +52,90 @@ class UserDashboardController extends Controller
         $subscriptions = [];
         foreach ($activeSubsData as $sub) {
             $subscriptions[] = [
-                'name' => $sub->product->name,
-                'package' => $sub->product->duration_days . ' Hari',
-                'end_date' => $sub->end_date->format('Y-m-d'),
-                'status' => 'Aktif', // we filter by active anyway
+                'name'         => $sub->product->name,
+                'package'      => $sub->product->duration_days . ' Hari',
+                'end_date'     => $sub->end_date->format('Y-m-d'),
+                'status'       => 'Aktif',
                 'product_slug' => $sub->product->slug,
-                'logo_path' => $sub->product->logo_path,
+                'logo_path'    => $sub->product->logo_path,
             ];
         }
 
-        return view('user.dashboard', compact('user', 'stats', 'subscriptions'));
+        return Inertia::render('User/Dashboard', [
+            'user'          => $user,
+            'stats'         => $stats,
+            'subscriptions' => $subscriptions,
+        ]);
     }
 
     public function katalog(Request $request)
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $user = ['name' => $userModel->name, 'points' => $userModel->points];
-        
+        $user      = ['name' => $userModel->name, 'points' => $userModel->points];
+
         $query = \App\Models\Product::where('is_active', true);
-        
+
         if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', '%' . $searchTerm . '%')
                   ->orWhere('category', 'like', '%' . $searchTerm . '%')
                   ->orWhere('description', 'like', '%' . $searchTerm . '%');
             });
         }
-        
-        $products = $query->get();
-        
-        return view('user.katalog', compact('user', 'products'));
+
+        $productsRaw = $query->get();
+
+        $products = $productsRaw->map(fn ($p) => [
+            'id'             => $p->id,
+            'name'           => $p->name,
+            'slug'           => $p->slug,
+            'category'       => $p->category,
+            'description'    => $p->description,
+            'original_price' => $p->original_price,
+            'aksespro_price' => $p->aksespro_price,
+            'duration_days'  => $p->duration_days,
+            'logo_path'      => $p->logo_path,
+            'stock'          => $p->stock,
+        ])->values()->toArray();
+
+        return Inertia::render('User/Katalog', [
+            'user'     => $user,
+            'products' => $products,
+            'search'   => $request->search ?? '',
+        ]);
     }
 
     public function showProduct($slug)
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $user = ['name' => $userModel->name, 'points' => $userModel->points];
+        $user      = ['name' => $userModel->name, 'points' => $userModel->points];
 
-        $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
+        $productModel = \App\Models\Product::where('slug', $slug)->firstOrFail();
 
-        return view('user.katalog-detail', compact('user', 'product'));
+        $product = [
+            'id'             => $productModel->id,
+            'name'           => $productModel->name,
+            'slug'           => $productModel->slug,
+            'category'       => $productModel->category,
+            'description'    => $productModel->description,
+            'original_price' => $productModel->original_price,
+            'aksespro_price' => $productModel->aksespro_price,
+            'duration_days'  => $productModel->duration_days,
+            'logo_path'      => $productModel->logo_path,
+            'stock'          => $productModel->stock,
+        ];
+
+        return Inertia::render('User/KatalogDetail', [
+            'user'    => $user,
+            'product' => $product,
+        ]);
     }
 
     public function langganan()
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $user = ['name' => $userModel->name, 'points' => $userModel->points];
+        $user      = ['name' => $userModel->name, 'points' => $userModel->points];
 
         $activeSubsData = \App\Models\UserSubscription::with('product')
             ->where('user_id', $userModel->id)
@@ -106,26 +144,29 @@ class UserDashboardController extends Controller
         $subscriptions = [];
         foreach ($activeSubsData as $sub) {
             $subscriptions[] = [
-                'name' => $sub->product->name,
-                'package' => $sub->product->duration_days . ' Hari',
-                'start_date' => $sub->start_date->format('Y-m-d'),
-                'end_date' => $sub->end_date->format('Y-m-d'),
-                'status' => ucfirst($sub->status),
-                'auto_renew' => $sub->auto_renew,
+                'name'         => $sub->product->name,
+                'package'      => $sub->product->duration_days . ' Hari',
+                'start_date'   => $sub->start_date->format('Y-m-d'),
+                'end_date'     => $sub->end_date->format('Y-m-d'),
+                'status'       => ucfirst($sub->status),
+                'auto_renew'   => $sub->auto_renew,
                 'product_slug' => $sub->product->slug,
-                'logo_path' => $sub->product->logo_path,
+                'logo_path'    => $sub->product->logo_path,
             ];
         }
 
-        return view('user.langganan', compact('user', 'subscriptions'));
+        return Inertia::render('User/Langganan', [
+            'user'          => $user,
+            'subscriptions' => $subscriptions,
+        ]);
     }
 
     public function transaksi()
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        
+
         $this->syncPendingTransactions($userModel);
-        
+
         $user = ['name' => $userModel->fresh()->name, 'points' => $userModel->fresh()->points];
 
         $transactionsData = \App\Models\Transaction::with('product')
@@ -133,69 +174,102 @@ class UserDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $statusMap    = [
+            'pending' => 'Menunggu',
+            'success' => 'Berhasil',
+            'failed'  => 'Gagal',
+        ];
         $transactions = [];
         foreach ($transactionsData as $trx) {
-            $statusMap = [
-                'pending' => 'Menunggu',
-                'success' => 'Berhasil',
-                'failed' => 'Gagal'
-            ];
-            
             $transactions[] = [
-                'id' => $trx->invoice_id,
-                'date' => $trx->created_at->format('Y-m-d H:i'),
+                'id'      => $trx->invoice_id,
+                'date'    => $trx->created_at->format('Y-m-d H:i'),
                 'product' => $trx->product->name,
-                'amount' => $trx->total_amount,
-                'method' => $trx->payment_method,
-                'status' => $statusMap[$trx->status] ?? $trx->status,
+                'amount'  => $trx->total_amount,
+                'method'  => $trx->payment_method,
+                'status'  => $statusMap[$trx->status] ?? $trx->status,
             ];
         }
 
-        return view('user.transaksi', compact('user', 'transactions'));
+        return Inertia::render('User/Transaksi', [
+            'user'         => $user,
+            'transactions' => $transactions,
+        ]);
     }
 
     public function downloadInvoice($invoiceId)
     {
-        $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
+        $userModel   = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
         $transaction = \App\Models\Transaction::with(['product', 'user'])
             ->where('invoice_id', $invoiceId)
             ->where('user_id', $userModel->id)
             ->firstOrFail();
 
+        // Invoice still rendered as Blade PDF — no Inertia needed here
         return view('user.invoice', compact('transaction'));
     }
 
     public function poin()
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $user = ['name' => $userModel->name, 'points' => $userModel->points];
+        $user      = ['name' => $userModel->name, 'points' => $userModel->points];
 
-        $products = \App\Models\Product::where('is_active', true)->get();
+        $productsRaw = \App\Models\Product::where('is_active', true)->get();
 
-        return view('user.poin', compact('user', 'products'));
+        $products = $productsRaw->map(fn ($p) => [
+            'id'             => $p->id,
+            'name'           => $p->name,
+            'slug'           => $p->slug,
+            'category'       => $p->category,
+            'description'    => $p->description,
+            'aksespro_price' => $p->aksespro_price,
+            'duration_days'  => $p->duration_days,
+            'logo_path'      => $p->logo_path,
+            'stock'          => $p->stock,
+        ])->values()->toArray();
+
+        return Inertia::render('User/Poin', [
+            'user'     => $user,
+            'products' => $products,
+        ]);
     }
 
     public function showPoinProduct($slug)
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $user = ['name' => $userModel->name, 'points' => $userModel->points];
+        $user      = ['name' => $userModel->name, 'points' => $userModel->points];
 
-        $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
+        $productModel = \App\Models\Product::where('slug', $slug)->firstOrFail();
 
-        return view('user.poin-detail', compact('user', 'product'));
+        $product = [
+            'id'             => $productModel->id,
+            'name'           => $productModel->name,
+            'slug'           => $productModel->slug,
+            'category'       => $productModel->category,
+            'description'    => $productModel->description,
+            'aksespro_price' => $productModel->aksespro_price,
+            'duration_days'  => $productModel->duration_days,
+            'logo_path'      => $productModel->logo_path,
+            'stock'          => $productModel->stock,
+        ];
+
+        return Inertia::render('User/PoinDetail', [
+            'user'    => $user,
+            'product' => $product,
+        ]);
     }
 
     public function redeemPoin(Request $request, $id)
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $product = \App\Models\Product::findOrFail($id);
+        $product   = \App\Models\Product::findOrFail($id);
 
         if ($userModel->points < $product->aksespro_price) {
-            return redirect()->back()->with('error', 'Poin tidak mencukupi untuk menukar produk ini.');
+            return back()->with('error', 'Poin tidak mencukupi untuk menukar produk ini.');
         }
 
         if ($product->stock <= 0) {
-            return redirect()->back()->with('error', 'Stok produk habis.');
+            return back()->with('error', 'Stok produk habis.');
         }
 
         // Deduct points
@@ -208,26 +282,26 @@ class UserDashboardController extends Controller
 
         // Create transaction
         $transaction = \App\Models\Transaction::create([
-            'invoice_id' => 'INV-POIN-' . now()->format('Ymd') . '-' . rand(100, 999),
-            'user_id' => $userModel->id,
-            'product_id' => $product->id,
-            'total_amount' => $product->aksespro_price, // the price in points
+            'invoice_id'     => 'INV-POIN-' . now()->format('Ymd') . '-' . rand(100, 999),
+            'user_id'        => $userModel->id,
+            'product_id'     => $product->id,
+            'total_amount'   => $product->aksespro_price,
             'payment_method' => 'Tukar Poin',
-            'status' => 'success',
+            'status'         => 'success',
         ]);
 
         // Create subscription
         \App\Models\UserSubscription::create([
-            'user_id' => $userModel->id,
-            'product_id' => $product->id,
-            'transaction_id' => $transaction->id,
+            'user_id'             => $userModel->id,
+            'product_id'          => $product->id,
+            'transaction_id'      => $transaction->id,
             'account_credentials' => [
-                'email' => strtolower(str_replace(' ', '', $product->name)) . rand(100,999) . '@aksespro.com',
-                'password' => 'AksesPro' . rand(1000,9999)
+                'email'    => strtolower(str_replace(' ', '', $product->name)) . rand(100, 999) . '@aksespro.com',
+                'password' => 'AksesPro' . rand(1000, 9999),
             ],
             'start_date' => now(),
-            'end_date' => now()->addDays($product->duration_days),
-            'status' => 'active',
+            'end_date'   => now()->addDays($product->duration_days),
+            'status'     => 'active',
             'auto_renew' => false,
         ]);
 
@@ -237,8 +311,11 @@ class UserDashboardController extends Controller
     public function bantuan()
     {
         $userModel = \Illuminate\Support\Facades\Auth::user() ?? \App\Models\User::where('role', 'member')->first();
-        $user = ['name' => $userModel->name, 'points' => $userModel->points];
-        return view('user.bantuan', compact('user'));
+        $user      = ['name' => $userModel->name, 'points' => $userModel->points];
+
+        return Inertia::render('User/Bantuan', [
+            'user' => $user,
+        ]);
     }
 
     private function syncPendingTransactions($userModel)
@@ -253,56 +330,56 @@ class UserDashboardController extends Controller
         }
 
         try {
-            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$serverKey    = config('midtrans.server_key');
             \Midtrans\Config::$isProduction = filter_var(config('midtrans.is_production', false), FILTER_VALIDATE_BOOLEAN);
-            \Midtrans\Config::$isSanitized = true;
-            \Midtrans\Config::$is3ds = true;
-            
+            \Midtrans\Config::$isSanitized  = true;
+            \Midtrans\Config::$is3ds        = true;
+
             foreach ($pendingTransactions as $trx) {
                 try {
                     $statusResponse = \Midtrans\Transaction::status($trx->invoice_id);
                 } catch (\Exception $e) {
                     continue; // Skip if transaction order ID doesn't exist yet on Midtrans side
                 }
-                
+
                 if (isset($statusResponse->transaction_status)) {
-                    $txStatus = $statusResponse->transaction_status;
+                    $txStatus    = $statusResponse->transaction_status;
                     $fraudStatus = $statusResponse->fraud_status ?? null;
-                    
+
                     if ($txStatus === 'settlement' || ($txStatus === 'capture' && $fraudStatus === 'accept')) {
                         $trx->update([
-                            'status' => 'success',
-                            'paid_at' => now(),
+                            'status'         => 'success',
+                            'paid_at'        => now(),
                             'payment_method' => $statusResponse->payment_type ?? $trx->payment_method,
                         ]);
-                        
+
                         $product = $trx->product;
-                        
+
                         // Prevent duplicate subscription
                         $existingSub = \App\Models\UserSubscription::where('user_id', $trx->user_id)
                             ->where('product_id', $trx->product_id)
                             ->where('start_date', '>=', now()->startOfDay())
                             ->first();
-                            
-                        if (!$existingSub) {
+
+                        if (! $existingSub) {
                             \App\Models\UserSubscription::create([
-                                'user_id' => $trx->user_id,
-                                'product_id' => $trx->product_id,
-                                'start_date' => now(),
-                                'end_date' => now()->addDays($product ? $product->duration_days : 30),
+                                'user_id'             => $trx->user_id,
+                                'product_id'          => $trx->product_id,
+                                'start_date'          => now(),
+                                'end_date'            => now()->addDays($product ? $product->duration_days : 30),
                                 'account_credentials' => [
-                                    'email' => strtolower(str_replace(' ', '', $userModel->name)) . '@aksespro.net',
+                                    'email'    => strtolower(str_replace(' ', '', $userModel->name)) . '@aksespro.net',
                                     'password' => 'AP-' . rand(1000, 9999),
-                                    'profile' => 'Profile ' . rand(1, 4)
+                                    'profile'  => 'Profile ' . rand(1, 4),
                                 ],
                                 'status' => 'active',
                             ]);
-                            
+
                             $userModel->increment('points', 10);
                         }
                     } elseif (in_array($txStatus, ['deny', 'expire', 'cancel', 'failed'])) {
                         $trx->update([
-                            'status' => 'failed'
+                            'status' => 'failed',
                         ]);
                     }
                 }

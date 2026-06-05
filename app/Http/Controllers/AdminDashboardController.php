@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Inertia\Inertia;
 
 class AdminDashboardController extends Controller
 {
@@ -217,30 +218,17 @@ class AdminDashboardController extends Controller
             ];
         }
 
-        if ($request->ajax() || $request->has('ajax')) {
-            return response()->json([
-                'stats' => $stats,
-                'recent_transactions' => $recent_transactions,
-                'chartLabels' => $chartLabels,
-                'chartData' => $chartData,
-                'categoryLabels' => $categoryLabels,
-                'categoryData' => $categoryData,
-                'recentUsers' => $recentUsers,
-                'periode' => $periode,
-            ]);
-        }
-
-        return view('admin.dashboard', compact(
-            'admin', 
-            'stats', 
-            'recent_transactions', 
-            'chartLabels', 
-            'chartData', 
-            'categoryLabels', 
-            'categoryData',
-            'recentUsers',
-            'periode'
-        ));
+        return Inertia::render('Admin/Dashboard', [
+            'admin'               => $admin,
+            'stats'               => $stats,
+            'recentTransactions'  => $recent_transactions,
+            'chartLabels'         => $chartLabels,
+            'chartData'           => $chartData,
+            'categoryLabels'      => $categoryLabels,
+            'categoryData'        => $categoryData,
+            'recentUsers'         => $recentUsers,
+            'periode'             => $periode,
+        ]);
     }
 
     public function produk()
@@ -248,8 +236,25 @@ class AdminDashboardController extends Controller
         $adminModel = \Illuminate\Support\Facades\Auth::user() ?? User::where('role', 'admin')->first();
         $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
 
-        $products = Product::all();
-        return view('admin.produk', compact('admin', 'products'));
+        $products = Product::all()->map(fn ($p) => [
+            'id'             => $p->id,
+            'name'           => $p->name,
+            'slug'           => $p->slug,
+            'category'       => $p->category,
+            'original_price' => $p->original_price,
+            'aksespro_price' => $p->aksespro_price,
+            'duration_days'  => $p->duration_days,
+            'stock'          => $p->stock,
+            'max_stock'      => $p->max_stock,
+            'description'    => $p->description,
+            'is_active'      => $p->is_active,
+            'logo_path'      => $p->logo_path,
+        ])->values()->toArray();
+
+        return Inertia::render('Admin/Produk', [
+            'admin'    => $admin,
+            'products' => $products,
+        ]);
     }
 
     public function storeProduct(Request $request)
@@ -325,32 +330,29 @@ class AdminDashboardController extends Controller
         $adminModel = \Illuminate\Support\Facades\Auth::user() ?? User::where('role', 'admin')->first();
         $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
 
-        $query = Transaction::with(['user', 'product']);
+        $transactionsData = Transaction::with(['user', 'product'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $query->orderBy('created_at', 'desc');
-
-        $transactionsData = $query->get();
-
+        $statusMap    = ['pending' => 'Menunggu', 'success' => 'Sukses', 'failed' => 'Gagal'];
         $transactions = [];
-        $statusMap = [
-            'pending' => 'Menunggu',
-            'success' => 'Sukses',
-            'failed' => 'Gagal'
-        ];
 
         foreach ($transactionsData as $trx) {
             $transactions[] = [
-                'id' => $trx->invoice_id,
-                'date' => $trx->created_at->format('Y-m-d H:i'),
-                'user' => $trx->user ? $trx->user->name : 'N/A',
+                'id'      => $trx->invoice_id,
+                'date'    => $trx->created_at->format('Y-m-d H:i'),
+                'user'    => $trx->user ? $trx->user->name : 'N/A',
                 'product' => $trx->product ? $trx->product->name : 'N/A',
-                'total' => 'Rp ' . number_format($trx->total_amount, 0, ',', '.'),
-                'method' => $trx->payment_method,
-                'status' => $statusMap[$trx->status] ?? $trx->status,
+                'total'   => 'Rp ' . number_format($trx->total_amount, 0, ',', '.'),
+                'method'  => $trx->payment_method,
+                'status'  => $statusMap[$trx->status] ?? $trx->status,
             ];
         }
 
-        return view('admin.transaksi', compact('admin', 'transactions'));
+        return Inertia::render('Admin/Transaksi', [
+            'admin'        => $admin,
+            'transactions' => $transactions,
+        ]);
     }
 
     public function verifyTransaction($id)
@@ -447,17 +449,20 @@ class AdminDashboardController extends Controller
         $users = [];
         foreach ($usersData as $u) {
             $users[] = [
-                'id' => $u->id,
-                'name' => $u->name,
-                'email' => $u->email,
-                'role' => 'Member',
-                'points' => $u->points ?? 0,
+                'id'        => $u->id,
+                'name'      => $u->name,
+                'email'     => $u->email,
+                'role'      => 'Member',
+                'points'    => $u->points ?? 0,
                 'join_date' => $u->created_at->format('Y-m-d'),
-                'status' => $u->is_active ? 'Aktif' : 'Suspended',
+                'status'    => $u->is_active ? 'Aktif' : 'Suspended',
             ];
         }
 
-        return view('admin.pengguna', compact('admin', 'users'));
+        return Inertia::render('Admin/Pengguna', [
+            'admin' => $admin,
+            'users' => $users,
+        ]);
     }
 
     public function storeUser(Request $request)
@@ -526,17 +531,16 @@ class AdminDashboardController extends Controller
 
         $periode = $request->get('periode', 'bulan-ini');
 
-        // Ranges setup
         if ($periode === 'bulan-lalu') {
             $startDate = now()->subMonth()->startOfMonth();
-            $endDate = now()->subMonth()->endOfMonth();
+            $endDate   = now()->subMonth()->endOfMonth();
         } elseif ($periode === 'tahun-ini') {
             $startDate = now()->startOfYear();
-            $endDate = now()->endOfYear();
+            $endDate   = now()->endOfYear();
         } else {
-            $periode = 'bulan-ini';
+            $periode   = 'bulan-ini';
             $startDate = now()->startOfMonth();
-            $endDate = now()->endOfMonth();
+            $endDate   = now()->endOfMonth();
         }
 
         $successTrxs = Transaction::with('product')
@@ -545,7 +549,7 @@ class AdminDashboardController extends Controller
             ->get();
 
         $grossRevenue = $successTrxs->sum('total_amount');
-        $netProfit = $successTrxs->sum(function($trx) {
+        $netProfit    = $successTrxs->sum(function ($trx) {
             $originalPrice = $trx->product ? $trx->product->original_price : ($trx->total_amount * 0.7);
             return $trx->total_amount - $originalPrice;
         });
@@ -554,7 +558,6 @@ class AdminDashboardController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
-        // Group by product category
         $categoryData = [];
         foreach ($successTrxs as $trx) {
             if ($trx->product) {
@@ -562,22 +565,24 @@ class AdminDashboardController extends Controller
                 $categoryData[$cat] = ($categoryData[$cat] ?? 0) + $trx->total_amount;
             }
         }
-        $categoryLabels = array_keys($categoryData);
-        $categoryValues = array_values($categoryData);
 
-        // Group by payment method
         $paymentData = [];
         foreach ($successTrxs as $trx) {
             $method = $trx->payment_method ?: 'Transfer';
             $paymentData[$method] = ($paymentData[$method] ?? 0) + 1;
         }
-        $paymentLabels = array_keys($paymentData);
-        $paymentValues = array_values($paymentData);
 
-        return view('admin.laporan', compact(
-            'admin', 'grossRevenue', 'netProfit', 'failedTransactions', 
-            'categoryLabels', 'categoryValues', 'paymentLabels', 'paymentValues', 'periode'
-        ));
+        return Inertia::render('Admin/Laporan', [
+            'admin'              => $admin,
+            'grossRevenue'       => $grossRevenue,
+            'netProfit'          => $netProfit,
+            'failedTransactions' => $failedTransactions,
+            'categoryLabels'     => array_keys($categoryData),
+            'categoryValues'     => array_values($categoryData),
+            'paymentLabels'      => array_keys($paymentData),
+            'paymentValues'      => array_values($paymentData),
+            'periode'            => $periode,
+        ]);
     }
 
     public function exportLaporanPdf(Request $request)
@@ -635,7 +640,9 @@ class AdminDashboardController extends Controller
         $adminModel = \Illuminate\Support\Facades\Auth::user() ?? User::where('role', 'admin')->first();
         $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
 
-        return view('admin.pengaturan', compact('admin'));
+        return Inertia::render('Admin/Pengaturan', [
+            'admin' => $admin,
+        ]);
     }
 
     public function saveSettingsUmum(Request $request)
