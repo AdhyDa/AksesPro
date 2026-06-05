@@ -11,12 +11,10 @@ Alpine.start();
       if (navbar) {
         window.addEventListener('scroll', () => {
           if (window.scrollY > 60) {
-            navbar.classList.add('navbar-scrolled');
+            navbar.classList.add('bg-black/60', 'backdrop-blur-md');
           } else {
-            navbar.classList.remove('navbar-scrolled');
-            // On top keep transparent with subtle bg
-            if (window.scrollY === 0) {
-              navbar.style.background = '';
+            if (!menuOpen) { // Keep background if mobile menu is open
+              navbar.classList.remove('bg-black/60', 'backdrop-blur-md');
             }
           }
         });
@@ -37,11 +35,17 @@ Alpine.start();
             hamOpen.classList.add('hidden');
             hamClose.classList.remove('hidden');
             hamburger.setAttribute('aria-expanded', 'true');
+            // Add background when menu opens
+            navbar.classList.add('bg-black/60', 'backdrop-blur-md');
           } else {
             mobileMenu.classList.add('hidden');
             hamOpen.classList.remove('hidden');
             hamClose.classList.add('hidden');
             hamburger.setAttribute('aria-expanded', 'false');
+            // Remove background if scrolled to top
+            if (window.scrollY <= 60) {
+              navbar.classList.remove('bg-black/60', 'backdrop-blur-md');
+            }
           }
         });
 
@@ -53,6 +57,9 @@ Alpine.start();
             hamClose.classList.add('hidden');
             menuOpen = false;
             hamburger.setAttribute('aria-expanded', 'false');
+            if (window.scrollY <= 60) {
+              navbar.classList.remove('bg-black/60', 'backdrop-blur-md');
+            }
           });
         });
       }
