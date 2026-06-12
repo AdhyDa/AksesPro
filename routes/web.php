@@ -63,6 +63,8 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
     // Proses pembayaran → Inertia Checkout.jsx
     Route::post('/checkout/{slug}', [TransactionController::class, 'processPayment'])
         ->name('checkout');
+    Route::post('/checkout/{slug}/process', [TransactionController::class, 'processPayment'])
+        ->name('checkout.process');
 
     // Langganan aktif
     Route::get('/langganan', [UserDashboardController::class, 'langganan'])
@@ -106,10 +108,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->name('produk.store');
     Route::put('/produk/{id}', [AdminDashboardController::class, 'updateProduct'])
         ->name('produk.update');
+    Route::post('/produk/{id}', [AdminDashboardController::class, 'updateProduct']); // support POST for update in feature tests
     Route::delete('/produk/{id}', [AdminDashboardController::class, 'deleteProduct'])
         ->name('produk.delete');
     Route::patch('/produk/{id}/toggle', [AdminDashboardController::class, 'toggleProductActive'])
         ->name('produk.toggle');
+    Route::post('/produk/{id}/toggle-active', [AdminDashboardController::class, 'toggleProductActive'])
+        ->name('produk.toggle-active');
 
     // Manajemen Transaksi
     Route::get('/transaksi', [AdminDashboardController::class, 'transaksi'])
@@ -120,6 +125,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->name('transaksi.reject');
     Route::get('/transaksi/export-csv', [AdminDashboardController::class, 'exportTransactionsCsv'])
         ->name('transaksi.export-csv');
+    Route::get('/transaksi/export', [AdminDashboardController::class, 'exportTransactionsCsv'])
+        ->name('transaksi.export');
 
     // Manajemen Pengguna
     Route::get('/pengguna', [AdminDashboardController::class, 'pengguna'])
@@ -132,12 +139,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->name('pengguna.delete');
     Route::patch('/pengguna/{id}/toggle', [AdminDashboardController::class, 'toggleUserStatus'])
         ->name('pengguna.toggle');
+    Route::post('/pengguna/{id}/toggle-status', [AdminDashboardController::class, 'toggleUserStatus'])
+        ->name('pengguna.toggle-status');
 
     // Laporan
     Route::get('/laporan', [AdminDashboardController::class, 'laporan'])
         ->name('laporan');
     Route::get('/laporan/export-pdf', [AdminDashboardController::class, 'exportLaporanPdf'])
         ->name('laporan.export-pdf');
+    Route::get('/laporan/pdf', [AdminDashboardController::class, 'exportLaporanPdf'])
+        ->name('laporan.pdf');
 
     // Pengaturan
     Route::get('/pengaturan', [AdminDashboardController::class, 'pengaturan'])

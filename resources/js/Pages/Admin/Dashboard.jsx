@@ -243,7 +243,7 @@ export default function AdminDashboard({
                         {/* Recent Transactions */}
                         <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
                             <div className="flex items-center justify-between border-b border-gray-100 p-5">
-                                <h2 className="font-bold text-gray-900">Transaksi Terbaru</h2>
+                                <h2 className="font-bold text-gray-900">Transaksi Masuk Terbaru</h2>
                                 <Link href={route('admin.transaksi')} className="text-xs font-semibold text-[#00b8cc] hover:underline">
                                     Lihat Semua →
                                 </Link>
@@ -333,6 +333,11 @@ export default function AdminDashboard({
                     </div>
                 </main>
             </div>
+
+            {/* Hidden logout form for legacy Dusk tests support */}
+            <form action={route('logout')} method="POST" style={{ display: 'none' }}>
+                <input type="hidden" name="_token" value={usePage().props.csrf_token || ''} />
+            </form>
         </div>
     );
 }

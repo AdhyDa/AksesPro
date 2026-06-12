@@ -74,6 +74,7 @@ export default function Checkout({
 
     /* ── TASK 4: Handler Tombol Bayar ──────────────────────────────── */
     const handlePayment = () => {
+        console.log("handlePayment called with:", { snapToken, midtransClientKey, isProduction, snapReady });
         if (!snapReady || !window.snap) {
             alert('Gateway pembayaran belum siap. Coba lagi sesaat.');
             return;

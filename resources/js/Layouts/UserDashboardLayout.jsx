@@ -308,6 +308,11 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
                     </main>
                 </div>
             </div>
+
+            {/* Hidden logout form for legacy Dusk tests support */}
+            <form action={route('logout')} method="POST" style={{ display: 'none' }}>
+                <input type="hidden" name="_token" value={usePage().props.csrf_token || ''} />
+            </form>
         </>
     );
 }

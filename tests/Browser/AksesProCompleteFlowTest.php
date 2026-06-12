@@ -29,75 +29,82 @@ class AksesProCompleteFlowTest extends DuskTestCase
     public function testStudentPurchaseFlow(): void
     {
         $this->browse(function (Browser $browser) {
-            $randomString = strtolower(Str::random(5));
-            $email = "budi_{$randomString}@student.um.ac.id";
+            try {
+                $randomString = strtolower(Str::random(5));
+                $email = "budi_{$randomString}@student.um.ac.id";
 
-            $browser->visit('/register')
-                    ->pause(1000)
-                    // 2. Simulasikan klik tombol "Student" menggunakan metode bawaan Dusk
-                    ->waitFor('#btn-student-toggle', 10)
-                    ->click('#btn-student-toggle')
-                    ->pause(1500) // Tambahkan pause setelah aksi yang memicu animasi UI (transisi split-screen)
-                    
-                    // Pastikan placeholder email berubah menjadi nama@student.um.ac.id (sesuai efek AlpineJS)
-                    ->assertAttribute('input[name="email"]', 'placeholder', 'nama@student.um.ac.id')
-                    
-                    // 3. Isi formulir pendaftaran manual
-                    ->type('name', 'Budi Mahasiswa')
-                    ->type('email', $email)
-                    ->type('password', 'password123')
-                    ->type('password_confirmation', 'password123')
-                    ->waitFor('button[type="submit"]', 10)
-                    ->press('Lanjutkan dengan Akun Mahasiswa')
-                    ->pause(3000);
+                $browser->visit('/register')
+                        ->pause(1000)
+                        // 2. Simulasikan klik tombol "Student" menggunakan metode bawaan Dusk
+                        ->waitFor('#btn-student-toggle', 10)
+                        ->click('#btn-student-toggle')
+                        ->pause(1500) // Tambahkan pause setelah aksi yang memicu animasi UI (transisi split-screen)
+                        
+                        // Pastikan placeholder email berubah menjadi nama@student.um.ac.id (sesuai efek AlpineJS)
+                        ->assertAttribute('input[name="email"]', 'placeholder', 'nama@student.um.ac.id')
+                        
+                        // 3. Isi formulir pendaftaran manual
+                        ->type('name', 'Budi Mahasiswa')
+                        ->type('email', $email)
+                        ->type('password', 'password123')
+                        ->type('password_confirmation', 'password123')
+                        ->waitFor('button[type="submit"]', 10)
+                        ->press('Lanjutkan dengan Akun Mahasiswa')
+                        ->pause(3000);
 
-            // 4. Bypass verifikasi email dengan memanipulasi model User langsung di backend
-            $user = User::where('email', $email)->first();
-            if ($user) {
-                $user->markEmailAsVerified();
-                // Jika user login belum memiliki 100 poin, kita atur ke 100 sesuai instruksi "pastikan saldo poin memuat angka 100"
-                if ($user->points !== 100) {
-                    $user->points = 100;
-                    $user->save();
+                // 4. Bypass verifikasi email dengan memanipulasi model User langsung di backend
+                $user = User::where('email', $email)->first();
+                if ($user) {
+                    $user->markEmailAsVerified();
+                    // Jika user login belum memiliki 100 poin, kita atur ke 100 sesuai instruksi "pastikan saldo poin memuat angka 100"
+                    if ($user->points !== 100) {
+                        $user->points = 100;
+                        $user->save();
+                    }
                 }
+
+                $browser->visit('/user/dashboard')
+                        ->pause(1000)
+                        // 5. Pastikan saldo poin di dashboard menampilkan 100
+                        ->assertSee('100')
+                        
+                        // 6. Masuk ke halaman katalog
+                        ->visit('/user/katalog')
+                        ->pause(1000)
+                        // Klik salah satu produk (Beli) menggunakan metode bawaan Dusk dengan selector valid
+                        ->waitFor('.grid a', 10)
+                        ->click('.grid a')
+                        ->pause(2000)
+
+                        // Klik "Beli Sekarang" di halaman rincian produk untuk diarahkan ke halaman checkout
+                        ->waitFor('form[action*="checkout"] button[type="submit"]', 10)
+                        ->click('form[action*="checkout"] button[type="submit"]')
+                        ->pause(2000)
+                        
+                        // 7. Di halaman checkout review, klik "Bayar Sekarang" untuk memicu Midtrans Snap
+                        ->waitFor('#pay-button', 10)
+                        ->click('#pay-button')
+                        ->pause(1500) // Animasi / transisi UI setelah klik bayar
+                        
+                        // Pastikan jendela popup Midtrans Snap muncul
+                        ->waitFor('iframe#snap-midtrans', 10)
+                        ->assertPresent('iframe#snap-midtrans')
+                        
+                        // Kembali ke dashboard dan lakukan logout
+                        ->visit('/user/dashboard')
+                        ->pause(1000);
+                
+                // 8. Lakukan logout
+                // Karena menggunakan layout dropdown Breeze (yang mana tersembunyi), kita memanggil form logout secara langsung menggunakan JS:
+                $browser->script("document.querySelector('form[action*=\"logout\"]').submit();");
+                $browser->pause(1000)
+                        ->assertPathIs('/');
+            } catch (\Exception $e) {
+                fwrite(STDERR, "\n=== CHROMEDRIVER BROWSER CONSOLE LOGS ===\n");
+                fwrite(STDERR, print_r($browser->driver->manage()->getLog('browser'), true));
+                fwrite(STDERR, "\n=========================================\n");
+                throw $e;
             }
-
-            $browser->visit('/user/dashboard')
-                    ->pause(1000)
-                    // 5. Pastikan saldo poin di dashboard menampilkan 100
-                    ->assertSee('100')
-                    
-                    // 6. Masuk ke halaman katalog
-                    ->visit('/user/katalog')
-                    ->pause(1000)
-                    // Klik salah satu produk (Beli) menggunakan metode bawaan Dusk dengan selector valid
-                    ->waitFor('.grid a', 10)
-                    ->click('.grid a')
-                    ->pause(2000)
-
-                    // Klik "Beli Sekarang" di halaman rincian produk untuk diarahkan ke halaman checkout
-                    ->waitFor('form[action*="checkout"] button[type="submit"]', 10)
-                    ->click('form[action*="checkout"] button[type="submit"]')
-                    ->pause(2000)
-                    
-                    // 7. Di halaman checkout review, klik "Bayar Sekarang" untuk memicu Midtrans Snap
-                    ->waitFor('#pay-button', 10)
-                    ->click('#pay-button')
-                    ->pause(1500) // Animasi / transisi UI setelah klik bayar
-                    
-                    // Pastikan jendela popup Midtrans Snap muncul
-                    ->waitFor('iframe#snap-midtrans', 10)
-                    ->assertPresent('iframe#snap-midtrans')
-                    
-                    // Kembali ke dashboard dan lakukan logout
-                    ->visit('/user/dashboard')
-                    ->pause(1000);
-            
-            // 8. Lakukan logout
-            // Karena menggunakan layout dropdown Breeze (yang mana tersembunyi), kita memanggil form logout secara langsung menggunakan JS:
-            $browser->script("document.querySelector('form[action*=\"logout\"]').submit();");
-            $browser->pause(1000)
-                    ->assertPathIs('/');
         });
     }
 

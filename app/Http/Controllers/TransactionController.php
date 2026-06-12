@@ -93,6 +93,7 @@ class TransactionController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("TransactionController processPayment Exception: " . $e->getMessage());
             // If anything goes wrong, delete/cancel the transaction and show error
             $transaction->delete();
 

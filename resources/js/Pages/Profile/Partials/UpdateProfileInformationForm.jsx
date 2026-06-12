@@ -42,6 +42,7 @@ export default function UpdateProfileInformation({
 
                     <TextInput
                         id="name"
+                        name="name"
                         className="mt-1 block w-full"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
@@ -58,6 +59,7 @@ export default function UpdateProfileInformation({
 
                     <TextInput
                         id="email"
+                        name="email"
                         type="email"
                         className="mt-1 block w-full"
                         value={data.email}
@@ -93,7 +95,7 @@ export default function UpdateProfileInformation({
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={processing}>Simpan Perubahan</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
