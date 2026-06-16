@@ -640,10 +640,28 @@ class AdminDashboardController extends Controller
         $adminModel = \Illuminate\Support\Facades\Auth::user() ?? User::where('role', 'admin')->first();
         $admin = ['name' => $adminModel ? $adminModel->name : 'Superadmin'];
 
+        $settings = [
+            'system_name'          => \App\Models\Setting::get('system_name', 'AksesPro'),
+            'system_description'   => \App\Models\Setting::get('system_description', 'Platform Vending Machine Lisensi Digital Premium untuk Mahasiswa.'),
+            'logo'                 => \App\Models\Setting::get('logo') ? asset('uploads/' . \App\Models\Setting::get('logo')) : asset('Logo.png'),
+            'midtrans_environment' => \App\Models\Setting::get('midtrans_environment', 'sandbox'),
+            'midtrans_merchant_id' => \App\Models\Setting::get('midtrans_merchant_id', 'G45603405'),
+            'midtrans_client_key'  => \App\Models\Setting::get('midtrans_client_key', 'SB-Mid-client-xxxxxxxxxxxx'),
+            'midtrans_server_key'  => \App\Models\Setting::get('midtrans_server_key', 'SB-Mid-server-xxxxxxxxxxxx'),
+            'mail_mailer'          => \App\Models\Setting::get('mail_mailer', 'smtp'),
+            'mail_host'            => \App\Models\Setting::get('mail_host', 'smtp.gmail.com'),
+            'mail_port'            => \App\Models\Setting::get('mail_port', '465'),
+            'mail_encryption'      => \App\Models\Setting::get('mail_encryption', 'ssl'),
+            'mail_username'        => \App\Models\Setting::get('mail_username', 'adhyaksa209@gmail.com'),
+            'mail_password'        => \App\Models\Setting::get('mail_password', 'password'),
+        ];
+
         return Inertia::render('Admin/Pengaturan', [
-            'admin' => $admin,
+            'admin'    => $admin,
+            'settings' => $settings,
         ]);
     }
+
 
     public function saveSettingsUmum(Request $request)
     {

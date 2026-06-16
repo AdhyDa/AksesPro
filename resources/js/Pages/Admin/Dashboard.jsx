@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import FlashMessage from '@/Components/FlashMessage';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import Chart from 'chart.js/auto';
 
 /**
  * Admin/Dashboard.jsx
  *
- * Props dari AdminDashboardController::index():
+ * Props:
  *   - admin:              { name }
  *   - stats:              { monthly_revenue, revenue_trend, total_users, users_trend,
  *                           successful_orders, orders_trend, complaint_tickets, tickets_trend }
@@ -16,12 +17,8 @@ import FlashMessage from '@/Components/FlashMessage';
  *   - categoryData:       number[]
  *   - recentUsers:        Array<{ name, email, points, date, status }>
  *   - periode:            'bulan-ini' | 'bulan-lalu' | 'tahun-ini'
- *
- * Shared via HandleInertiaRequests:
- *   - auth.user:  { id, name, email, role, points }
- *   - flash:      { success, error, warning }
  */
-export default function AdminDashboard({
+export default function Dashboard({
     admin,
     stats,
     recentTransactions,
@@ -33,240 +30,453 @@ export default function AdminDashboard({
     periode,
 }) {
     const { auth } = usePage().props;
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [profileOpen, setProfileOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
-    /* ── Periode Filter ───────────────────────────────────────────── */
-    const periodeOptions = [
-        { value: 'bulan-ini',   label: 'Bulan Ini' },
-        { value: 'bulan-lalu',  label: 'Bulan Lalu' },
-        { value: 'tahun-ini',   label: 'Tahun Ini' },
-    ];
+    const revenueChartRef = useRef(null);
+    const categoryChartRef = useRef(null);
+    const revenueChartInst = useRef(null);
+    const categoryChartInst = useRef(null);
 
-    const handlePeriodeChange = (val) => {
-        router.get(route('admin.dashboard'), { periode: val }, { preserveState: false });
+    /* ── Period Selector Change ─────────────────────────────────────── */
+    const handlePeriodeChange = (newPeriode) => {
+        if (isLoading) return;
+        setIsLoading(true);
+        setToastMessage(`Memuat data untuk periode: ${getPeriodeLabel(newPeriode)}`);
+        setShowToast(true);
+
+        router.get(
+            route('admin.dashboard'),
+            { periode: newPeriode },
+            {
+                preserveState: false,
+                onFinish: () => {
+                    setTimeout(() => {
+                        setIsLoading(false);
+                        setShowToast(false);
+                    }, 500);
+                },
+            }
+        );
     };
 
-    /* ── Logout ───────────────────────────────────────────────────── */
-    const handleLogout = (e) => {
-        e.preventDefault();
-        router.post(route('logout'));
+    const getPeriodeLabel = (val) => {
+        if (val === 'bulan-lalu') return 'Bulan Lalu';
+        if (val === 'tahun-ini') return 'Tahun Ini';
+        return 'Bulan Ini';
     };
 
-    /* ── Sidebar Nav Items ────────────────────────────────────────── */
-    const navItems = [
-        { href: route('admin.dashboard'), label: 'Dashboard', routeName: 'admin.dashboard', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
-        { href: route('admin.produk'),    label: 'Produk',    routeName: 'admin.produk',    icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /> },
-        { href: route('admin.transaksi'), label: 'Transaksi', routeName: 'admin.transaksi', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> },
-        { href: route('admin.pengguna'), label: 'Pengguna',   routeName: 'admin.pengguna',  icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /> },
-        { href: route('admin.laporan'),  label: 'Laporan',    routeName: 'admin.laporan',   icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
-        { href: route('admin.pengaturan'), label: 'Pengaturan', routeName: 'admin.pengaturan', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />, icon2: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /> },
-    ];
+    /* ── Chart.js Lifecycle ─────────────────────────────────────────── */
+    useEffect(() => {
+        if (revenueChartRef.current) {
+            if (revenueChartInst.current) {
+                revenueChartInst.current.destroy();
+            }
 
-    const isActive = (routeName) => {
-        try { return route().current(routeName); } catch { return false; }
-    };
+            const ctx = revenueChartRef.current.getContext('2d');
+            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(0, 229, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
 
-    /* ── Stat Cards ───────────────────────────────────────────────── */
-    const statCards = [
-        { label: 'Pendapatan Bulan Ini', value: stats.monthly_revenue, trend: stats.revenue_trend, color: 'blue',   isPositive: stats.revenue_trend?.startsWith('+'), icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> },
-        { label: 'Total Pengguna',       value: stats.total_users,     trend: stats.users_trend,   color: 'indigo', isPositive: true, icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /> },
-        { label: 'Transaksi Sukses',     value: stats.successful_orders, trend: stats.orders_trend, color: 'emerald', isPositive: stats.orders_trend?.startsWith('+'), icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /> },
-        { label: 'Tiket Komplain',       value: stats.complaint_tickets, trend: stats.tickets_trend, color: 'orange', isPositive: false, icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /> },
-    ];
+            revenueChartInst.current = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        {
+                            label: periode === 'tahun-ini' ? 'Pendapatan (Rp)' : 'Pendapatan Harian (Rp)',
+                            data: chartData,
+                            borderColor: '#0A2540',
+                            backgroundColor: gradient,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#00E5FF',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.4,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0A2540',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function (context) {
+                                    return (
+                                        'Rp ' +
+                                        context.parsed.y.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                                    );
+                                },
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f8fafc', drawBorder: false },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { weight: '600', size: 10 },
+                                callback: function (value) {
+                                    if (value >= 1000000) {
+                                        return 'Rp ' + (value / 1000000).toFixed(1) + ' jt';
+                                    } else if (value >= 1000) {
+                                        return 'Rp ' + (value / 1000).toFixed(0) + ' k';
+                                    }
+                                    return 'Rp ' + value;
+                                },
+                            },
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { weight: '600', size: 10 },
+                            },
+                        },
+                    },
+                },
+            });
+        }
 
+        if (categoryChartRef.current) {
+            if (categoryChartInst.current) {
+                categoryChartInst.current.destroy();
+            }
+
+            const catCtx = categoryChartRef.current.getContext('2d');
+            categoryChartInst.current = new Chart(catCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [
+                        {
+                            data: categoryData,
+                            backgroundColor: ['#0A2540', '#00E5FF', '#4F46E5', '#10B981'],
+                            borderWidth: 3,
+                            borderColor: '#fff',
+                            hoverOffset: 6,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0A2540',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 10,
+                            displayColors: true,
+                            callbacks: {
+                                label: function (context) {
+                                    return ' ' + context.label + ': ' + context.parsed + ' pesanan';
+                                },
+                            },
+                        },
+                    },
+                    cutout: '72%',
+                },
+            });
+        }
+
+        return () => {
+            if (revenueChartInst.current) revenueChartInst.current.destroy();
+            if (categoryChartInst.current) categoryChartInst.current.destroy();
+        };
+    }, [chartData, chartLabels, categoryData, categoryLabels, periode]);
+
+    /* ── Color Map & Badges ─────────────────────────────────────────── */
     const colorMap = {
-        blue:    { bg: 'bg-blue-50',    text: 'text-blue-600' },
-        indigo:  { bg: 'bg-indigo-50',  text: 'text-indigo-600' },
+        blue: { bg: 'bg-blue-50', text: 'text-blue-600' },
+        indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600' },
         emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
-        orange:  { bg: 'bg-orange-50',  text: 'text-orange-600' },
+        orange: { bg: 'bg-orange-50', text: 'text-orange-600' },
     };
 
     const statusBadge = (status) => {
         const map = {
-            'Sukses': 'bg-green-50 text-green-700',
-            'Menunggu': 'bg-yellow-50 text-yellow-700',
-            'Gagal': 'bg-red-50 text-red-700',
+            Sukses: 'bg-green-50 text-green-700 border border-green-100',
+            Menunggu: 'bg-yellow-50 text-yellow-700 border border-yellow-100',
+            Gagal: 'bg-red-50 text-red-700 border border-red-100',
         };
         return map[status] ?? 'bg-gray-50 text-gray-700';
     };
 
-    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.name ?? 'Admin')}&background=0A2540&color=fff`;
+    const statCards = [
+        {
+            label: periode === 'tahun-ini' ? 'Pendapatan Tahun Ini' : periode === 'bulan-lalu' ? 'Pendapatan Bulan Lalu' : 'Pendapatan Bulan Ini',
+            value: stats.monthly_revenue,
+            trend: stats.revenue_trend,
+            color: 'emerald',
+            isPositive: !stats.revenue_trend?.startsWith('-'),
+            icon: (
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                />
+            ),
+        },
+        {
+            label: 'Total Pengguna',
+            value: stats.total_users,
+            trend: stats.users_trend,
+            color: 'blue',
+            isPositive: true,
+            icon: (
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+            ),
+        },
+        {
+            label: 'Pesanan Sukses',
+            value: stats.successful_orders,
+            trend: stats.orders_trend,
+            color: 'indigo',
+            isPositive: !stats.orders_trend?.startsWith('-'),
+            icon: (
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+            ),
+        },
+        {
+            label: 'Tiket Komplain',
+            value: stats.complaint_tickets,
+            trend: stats.tickets_trend,
+            color: 'orange',
+            isPositive: stats.tickets_trend?.startsWith('-'),
+            icon: (
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+            ),
+        },
+    ];
 
     return (
-        <div className="flex h-screen bg-gray-50 font-sans antialiased text-[#0A2540]">
+        <DashboardLayout title="Dashboard Overview">
             <Head title="Dashboard Admin — AksesPro" />
 
-            {/* ── Mobile Overlay ── */}
-            {sidebarOpen && (
-                <div className="fixed inset-0 z-20 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="fixed bottom-4 right-4 z-50 bg-gray-900 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in">
+                    <svg className="w-5 h-5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-medium">{toastMessage}</span>
+                </div>
             )}
 
-            {/* ── Sidebar ── */}
-            <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0A2540] text-white transition-transform duration-300 lg:static lg:translate-x-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                {/* Sidebar Header */}
-                <div className="flex h-20 items-center border-b border-white/10 px-6">
-                    {/* ⚠️ Beranda publik → <a> biasa, bukan <Link> */}
-                    <a href="/" className="flex items-center gap-3">
-                        <img src="/Logo.png" alt="AksesPro" className="h-10 w-10 flex-shrink-0 object-contain" />
-                        <span className="text-xl font-bold">Akses<span className="text-[#FFD700]">Pro</span></span>
-                    </a>
-                </div>
-
-                {/* Badge Admin */}
-                <div className="px-4 pt-4">
-                    <div className="rounded-xl bg-white/10 px-4 py-2 text-center">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-white/50">Panel Admin</p>
-                    </div>
-                </div>
-
-                {/* Nav */}
-                <nav className="flex-1 overflow-y-auto py-4 px-4 space-y-1">
-                    {navItems.map((item) => {
-                        const active = isActive(item.routeName);
-                        return (
-                            <Link
-                                key={item.routeName}
-                                href={item.href}
-                                className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${active ? 'bg-white/10 text-[#00E5FF]' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
-                            >
-                                <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    {item.icon}
-                                    {item.icon2}
-                                </svg>
-                                <span className={active ? 'font-semibold' : 'font-medium'}>{item.label}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                {/* Sidebar Footer */}
-                <div className="p-4 border-t border-white/10">
-                    <Link href={route('user.dashboard')}
-                        className="flex items-center gap-3 rounded-xl px-4 py-3 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
-                    >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        <span className="font-medium">Lihat Toko</span>
-                    </Link>
-                </div>
-            </aside>
-
-            {/* ── Main ── */}
-            <div className="flex flex-1 flex-col overflow-hidden">
-                {/* Topbar */}
-                <header className="relative z-40 flex h-20 items-center justify-between border-b border-gray-200 bg-white px-6">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => setSidebarOpen(true)} className="text-gray-500 lg:hidden">
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-                        <div>
-                            <h1 className="text-lg font-bold text-[#0A2540]">Dashboard Admin</h1>
-                            <p className="text-xs text-gray-400">Selamat datang, {auth?.user?.name ?? admin?.name}</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                        {/* Periode Selector */}
+            <div className="space-y-6">
+                
+                {/* Header Section */}
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold text-[#0A2540]">Dashboard Overview</h1>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">Periode:</span>
                         <select
                             value={periode}
                             onChange={(e) => handlePeriodeChange(e.target.value)}
-                            className="hidden sm:block rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 focus:border-[#00E5FF] focus:ring-[#00E5FF]"
-                            id="periode-selector"
+                            className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#00E5FF] focus:border-[#00E5FF] block px-3 py-2 pr-10 font-medium cursor-pointer shadow-sm hover:border-gray-300 transition-colors"
                         >
-                            {periodeOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
+                            <option value="bulan-ini">Bulan Ini</option>
+                            <option value="bulan-lalu">Bulan Lalu</option>
+                            <option value="tahun-ini">Tahun Ini</option>
                         </select>
+                    </div>
+                </div>
 
-                        {/* Profile Dropdown */}
-                        <div className="relative">
-                            <button
-                                id="admin-profile-btn"
-                                onClick={() => setProfileOpen(!profileOpen)}
-                                className="flex items-center gap-2"
+                {/* 4 Stat Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {statCards.map((card) => {
+                        const c = colorMap[card.color];
+                        return (
+                            <div
+                                key={card.label}
+                                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-hidden transition-all duration-300 hover:shadow-md group"
                             >
-                                <img src={avatarUrl} alt="Avatar" className="h-9 w-9 rounded-full border-2 border-[#00E5FF]/30" />
-                                <div className="hidden sm:block text-left">
-                                    <p className="text-sm font-semibold text-gray-800">{auth?.user?.name ?? admin?.name}</p>
-                                    <p className="text-xs text-gray-500">Administrator</p>
+                                {isLoading && (
+                                    <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                        <div className="w-6 h-6 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                )}
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <p className="text-gray-500 text-sm font-medium mb-1">{card.label}</p>
+                                        <h3 className="text-2xl font-bold text-gray-900 transition-all duration-300">
+                                            {card.value}
+                                        </h3>
+                                    </div>
+                                    <div className={`w-12 h-12 rounded-lg ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            {card.icon}
+                                        </svg>
+                                    </div>
                                 </div>
-                            </button>
-                            {profileOpen && (
-                                <div
-                                    id="admin-profile-dropdown"
-                                    className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-lg z-50"
-                                    onMouseLeave={() => setProfileOpen(false)}
-                                >
-                                    <Link href={route('profile.edit')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Profil Saya</Link>
-                                    <div className="my-1 border-t border-gray-100" />
-                                    <button onClick={handleLogout} id="admin-logout-btn" className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
-                                        Logout
-                                    </button>
+                                <div className="mt-4 flex items-center text-sm">
+                                    <span className={`font-semibold flex items-center gap-1 transition-colors duration-300 ${card.isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+                                        <svg
+                                            className={`w-4 h-4 ${!card.isPositive ? 'transform rotate-180' : ''}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                        </svg>
+                                        <span>{card.trend}</span>
+                                    </span>
+                                    <span className="text-gray-400 ml-2">
+                                        {periode === 'tahun-ini' ? 'vs tahun lalu' : 'vs bulan lalu'}
+                                    </span>
                                 </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Charts Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Statistik Pendapatan (Line Chart) */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:col-span-2 flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md">
+                        {isLoading && (
+                            <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                <div className="w-8 h-8 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-[#0A2540]">Statistik Pendapatan</h2>
+                            <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-lg transition-all duration-300">
+                                {periode === 'tahun-ini' ? 'Tahun Ini (Bulanan)' : periode === 'bulan-lalu' ? 'Bulan Lalu (Harian)' : 'Bulan Ini (Harian)'}
+                            </span>
+                        </div>
+                        <div className="relative h-72 w-full">
+                            <canvas ref={revenueChartRef} />
+                        </div>
+                    </div>
+
+                    {/* Kategori Produk Terlaris (Doughnut Chart) */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-md">
+                        {isLoading && (
+                            <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                <div className="w-8 h-8 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between mb-4 border-b border-gray-55 pb-3">
+                            <h2 className="text-lg font-bold text-[#0A2540]">Kategori Terlaris</h2>
+                            <span className="text-xs font-semibold text-[#00b8cc] bg-[#00E5FF]/10 px-2.5 py-1 rounded-lg">
+                                Volume
+                            </span>
+                        </div>
+                        <div className="relative h-44 w-full flex items-center justify-center my-2">
+                            <canvas ref={categoryChartRef} />
+                        </div>
+                        {/* Legends */}
+                        <div className="flex flex-wrap justify-center gap-3 text-xs font-bold text-gray-500 mt-2">
+                            {categoryLabels.map((label, index) => {
+                                const hasData = categoryData[index] > 0;
+                                if (!hasData) return null;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100/50"
+                                    >
+                                        <span
+                                            className="w-2.5 h-2.5 rounded-full"
+                                            style={{
+                                                backgroundColor: ['#0A2540', '#00E5FF', '#4F46E5', '#10B981'][index % 4],
+                                            }}
+                                        />
+                                        <span>{label}</span>
+                                    </div>
+                                );
+                            })}
+                            {categoryData.reduce((a, b) => a + b, 0) === 0 && (
+                                <div className="text-gray-400 text-xs py-1">Tidak ada penjualan di periode ini</div>
                             )}
                         </div>
                     </div>
-                </header>
+                </div>
 
-                {/* Content */}
-                <main className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6">
-                    {/* Flash Messages */}
-                    <FlashMessage />
-
-                    {/* Stat Cards */}
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-                        {statCards.map((card) => {
-                            const c = colorMap[card.color];
-                            return (
-                                <div key={card.label} className="flex items-start gap-4 rounded-xl border border-gray-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${c.bg} ${c.text}`}>
-                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">{card.icon}</svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-500">{card.label}</p>
-                                        <h3 className="text-2xl font-bold text-gray-900">{card.value}</h3>
-                                        <p className={`mt-1 text-xs font-medium ${card.isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                                            {card.trend} vs. periode lalu
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Recent Transactions + Recent Users */}
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        {/* Recent Transactions */}
-                        <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                            <div className="flex items-center justify-between border-b border-gray-100 p-5">
-                                <h2 className="font-bold text-gray-900">Transaksi Masuk Terbaru</h2>
-                                <Link href={route('admin.transaksi')} className="text-xs font-semibold text-[#00b8cc] hover:underline">
-                                    Lihat Semua →
+                {/* Tables & Lists Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Transaksi Masuk Terbaru (2/3 width) */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden lg:col-span-2 flex flex-col justify-between transition-all duration-300 hover:shadow-md">
+                        <div>
+                            <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <h2 className="text-lg font-bold text-[#0A2540]">Transaksi Masuk Terbaru</h2>
+                                <Link
+                                    href={route('admin.transaksi')}
+                                    className="px-4 py-2 bg-[#00E5FF]/10 text-[#00b8cc] hover:bg-[#00E5FF]/20 font-semibold rounded-lg text-sm transition-colors"
+                                >
+                                    Lihat Semua
                                 </Link>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                                <table className="w-full text-sm text-left text-gray-500">
+                                    <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                                         <tr>
-                                            <th className="px-5 py-3 text-left">Pengguna</th>
-                                            <th className="px-5 py-3 text-left">Produk</th>
-                                            <th className="px-5 py-3 text-left">Total</th>
-                                            <th className="px-5 py-3 text-left">Status</th>
+                                            <th scope="col" className="px-5 py-3">Nama User</th>
+                                            <th scope="col" className="px-5 py-3">Produk</th>
+                                            <th scope="col" className="px-5 py-3">Total</th>
+                                            <th scope="col" className="px-5 py-3">Metode</th>
+                                            <th scope="col" className="px-5 py-3">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {(recentTransactions ?? []).length === 0 ? (
-                                            <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-400">Belum ada transaksi.</td></tr>
+                                        {recentTransactions.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="px-5 py-8 text-center text-gray-400">
+                                                    Belum ada transaksi.
+                                                </td>
+                                            </tr>
                                         ) : (
-                                            (recentTransactions ?? []).map((trx, idx) => (
-                                                <tr key={idx} className="border-b hover:bg-gray-50">
-                                                    <td className="px-5 py-3 font-medium text-gray-800">{trx.user}</td>
+                                            recentTransactions.map((trx, idx) => (
+                                                <tr key={idx} className="border-b hover:bg-gray-50 transition-colors">
+                                                    <td className="px-5 py-3 font-semibold text-gray-900 flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+                                                            <img
+                                                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                                                    trx.user
+                                                                )}&background=fff&color=0A2540`}
+                                                                alt={trx.user}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        {trx.user}
+                                                    </td>
                                                     <td className="px-5 py-3 text-gray-600">{trx.product}</td>
-                                                    <td className="px-5 py-3 font-semibold text-gray-800">{trx.total}</td>
+                                                    <td className="px-5 py-3 font-bold text-gray-900">{trx.total}</td>
+                                                    <td className="px-5 py-3">
+                                                        <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-semibold">
+                                                            {trx.payment}
+                                                        </span>
+                                                    </td>
                                                     <td className="px-5 py-3">
                                                         <span className={`rounded-md px-2 py-1 text-xs font-semibold ${statusBadge(trx.status)}`}>
                                                             {trx.status}
@@ -279,33 +489,53 @@ export default function AdminDashboard({
                                 </table>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Recent Users */}
-                        <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-                            <div className="flex items-center justify-between border-b border-gray-100 p-5">
-                                <h2 className="font-bold text-gray-900">Pengguna Baru</h2>
-                                <Link href={route('admin.pengguna')} className="text-xs font-semibold text-[#00b8cc] hover:underline">
-                                    Lihat Semua →
+                    {/* Right Column: Pengguna Baru Terdaftar (1/3 width) */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-md">
+                        <div>
+                            <div className="border-b border-gray-50 pb-4 mb-4 flex items-center justify-between">
+                                <h2 className="text-lg font-bold text-[#0A2540]">Pengguna Baru</h2>
+                                <Link
+                                    href={route('admin.pengguna')}
+                                    className="text-xs font-bold text-[#00b8cc] hover:underline bg-[#00E5FF]/10 px-2 py-1 rounded-md"
+                                >
+                                    Lihat Semua
                                 </Link>
                             </div>
-                            <div className="divide-y divide-gray-50">
-                                {(recentUsers ?? []).length === 0 ? (
-                                    <div className="px-5 py-8 text-center text-gray-400">Belum ada pengguna baru.</div>
+                            <div className="space-y-4">
+                                {recentUsers.length === 0 ? (
+                                    <p className="text-xs text-gray-500 text-center py-6">Belum ada pengguna baru.</p>
                                 ) : (
-                                    (recentUsers ?? []).map((usr, idx) => (
-                                        <div key={idx} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50">
-                                            <img
-                                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(usr.name)}&background=e0f2fe&color=0284c7&size=32`}
-                                                alt={usr.name}
-                                                className="h-8 w-8 rounded-full flex-shrink-0"
-                                            />
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-medium text-gray-800">{usr.name}</p>
-                                                <p className="truncate text-xs text-gray-500">{usr.email}</p>
+                                    recentUsers.map((usr, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50/70 transition-colors border border-transparent hover:border-gray-100"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-full bg-gray-100 text-[#0a2540] flex items-center justify-center font-bold border border-gray-200 overflow-hidden">
+                                                    <img
+                                                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                                            usr.name
+                                                        )}&background=0A2540&color=fff`}
+                                                        alt={usr.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-gray-900 leading-tight">
+                                                        {usr.name}
+                                                    </h4>
+                                                    <p className="text-xs text-gray-400 font-mono mt-0.5 leading-none">
+                                                        {usr.email.length > 20 ? `${usr.email.substring(0, 18)}...` : usr.email}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="text-right flex-shrink-0">
-                                                <p className="text-xs font-semibold text-[#00b8cc]">{usr.points} Pts</p>
-                                                <p className="text-xs text-gray-400">{usr.date}</p>
+                                            <div className="text-right">
+                                                <p className="text-[10px] text-gray-400 font-semibold">{usr.date}</p>
+                                                <span className="inline-flex text-[9px] font-bold text-[#00b8cc] bg-[#00E5FF]/10 px-2 py-0.5 rounded-md mt-1">
+                                                    {usr.points.toLocaleString('id-ID')} Pts
+                                                </span>
                                             </div>
                                         </div>
                                     ))
@@ -313,31 +543,8 @@ export default function AdminDashboard({
                             </div>
                         </div>
                     </div>
-
-                    {/* Quick Links */}
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        {[
-                            { href: route('admin.produk'),    label: 'Kelola Produk',   color: 'bg-blue-600' },
-                            { href: route('admin.transaksi'), label: 'Cek Transaksi',   color: 'bg-indigo-600' },
-                            { href: route('admin.pengguna'),  label: 'Kelola User',     color: 'bg-emerald-600' },
-                            { href: route('admin.laporan'),   label: 'Lihat Laporan',   color: 'bg-orange-600' },
-                        ].map((btn) => (
-                            <Link
-                                key={btn.label}
-                                href={btn.href}
-                                className={`${btn.color} flex items-center justify-center rounded-xl py-4 text-center text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md`}
-                            >
-                                {btn.label}
-                            </Link>
-                        ))}
-                    </div>
-                </main>
+                </div>
             </div>
-
-            {/* Hidden logout form for legacy Dusk tests support */}
-            <form action={route('logout')} method="POST" style={{ display: 'none' }}>
-                <input type="hidden" name="_token" value={usePage().props.csrf_token || ''} />
-            </form>
-        </div>
+        </DashboardLayout>
     );
 }

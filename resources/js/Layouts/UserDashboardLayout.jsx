@@ -147,10 +147,6 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
 
     return (
         <>
-            {/* Dynamic <title> */}
-            {typeof document !== 'undefined' &&
-                (document.title = `AksesPro - ${title}`)}
-
             <div className="flex h-screen bg-gray-50 font-sans antialiased text-[#0A2540]">
 
                 {/* ── Mobile Sidebar Overlay ── */}
@@ -187,7 +183,7 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
                         {navItems.map((item) => (
                             <NavItem key={item.routeName} item={item} />
                         ))}
-                        <NavItem item={supportItem} hasBorderTop />
+                        <NavItem item={supportItem} />
                     </div>
 
                     {/* Sidebar Footer — Kembali ke Beranda */}
