@@ -133,7 +133,7 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
                     hasBorderTop ? 'mt-4 border-t border-white/10 pt-4' : ''
                 } ${
                     active
-                        ? 'bg-white/10 text-[#00E5FF]'
+                        ? 'bg-white/10 text-cyan-accent'
                         : 'text-white/70 hover:bg-white/5 hover:text-white'
                 }`}
             >
@@ -150,16 +150,16 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
             <div className="flex h-screen bg-gray-50 font-sans antialiased text-[#0A2540]">
 
                 {/* ── Mobile Sidebar Overlay ── */}
-                {sidebarOpen && (
-                    <div
-                        className="fixed inset-0 z-20 bg-black/50 lg:hidden"
-                        onClick={() => setSidebarOpen(false)}
-                    />
-                )}
+                <div
+                    className={`fixed inset-0 z-20 bg-black/50 lg:hidden transition-opacity duration-300 ${
+                        sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
+                />
 
                 {/* ── Sidebar ── */}
                 <aside
-                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0A2540] text-white transition-transform duration-300 lg:static lg:translate-x-0 flex flex-col ${
+                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-navy text-white transition-transform duration-300 lg:static lg:translate-x-0 flex flex-col ${
                         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 >
@@ -194,7 +194,7 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
                             className="flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-white/10 hover:text-white rounded-xl transition-colors w-full group"
                         >
                             <svg
-                                className="w-5 h-5 text-white/50 group-hover:text-[#00E5FF] transition-colors"
+                                className="w-5 h-5 text-white/50 group-hover:text-cyan-accent transition-colors"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -242,7 +242,7 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Cari sesuatu..."
-                                    className="block w-64 rounded-full border border-gray-300 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 transition-shadow focus:border-[#00E5FF] focus:ring-[#00E5FF]"
+                                    className="block w-64 rounded-full border border-gray-300 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 transition-shadow focus:border-cyan-accent focus:ring-cyan-accent"
                                 />
                             </form>
                         </div>
@@ -257,7 +257,7 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
                                     aria-expanded={profileOpen}
                                     aria-haspopup="true"
                                 >
-                                    <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[#00E5FF]/50 bg-[#00E5FF]/20">
+                                    <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-cyan-accent/50 bg-cyan-accent/20">
                                         <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
                                     </div>
                                     <div className="hidden text-left sm:block">
@@ -272,28 +272,28 @@ export default function UserDashboardLayout({ user, children, title = 'Dashboard
                                 </button>
 
                                 {/* Dropdown */}
-                                {profileOpen && (
-                                    <div
-                                        id="profile-dropdown"
-                                        className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 z-50"
-                                        onMouseLeave={() => setProfileOpen(false)}
+                                <div
+                                    id="profile-dropdown"
+                                    className={`absolute right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 z-50 transition-all duration-200 transform origin-top-right ${
+                                        profileOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+                                    }`}
+                                    onMouseLeave={() => setProfileOpen(false)}
+                                >
+                                    <Link
+                                        href={route('profile.edit')}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-navy"
                                     >
-                                        <Link
-                                            href={route('profile.edit')}
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0A2540]"
-                                        >
-                                            Profil Saya
-                                        </Link>
-                                        <div className="my-1 border-t border-gray-100" />
-                                        <button
-                                            onClick={handleLogout}
-                                            id="logout-btn"
-                                            className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-                                        >
-                                            Logout
-                                        </button>
-                                    </div>
-                                )}
+                                        Profil Saya
+                                    </Link>
+                                    <div className="my-1 border-t border-gray-100" />
+                                    <button
+                                        onClick={handleLogout}
+                                        id="logout-btn"
+                                        className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </header>

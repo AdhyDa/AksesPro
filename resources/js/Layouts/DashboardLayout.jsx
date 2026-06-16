@@ -127,16 +127,16 @@ export default function DashboardLayout({ children, title = 'Admin Dashboard' })
             <div className="flex h-screen bg-gray-50 font-sans antialiased text-[#0A2540] overflow-hidden">
                 
                 {/* Mobile Sidebar Overlay */}
-                {sidebarOpen && (
-                    <div
-                        className="fixed inset-0 z-20 bg-black/50 lg:hidden transition-opacity duration-300"
-                        onClick={() => setSidebarOpen(false)}
-                    />
-                )}
+                <div
+                    className={`fixed inset-0 z-20 bg-black/50 lg:hidden transition-opacity duration-300 ${
+                        sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
+                />
 
                 {/* Sidebar */}
                 <aside
-                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0A2540] text-white transition-transform duration-300 lg:static lg:translate-x-0 flex flex-col ${
+                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-navy text-white transition-transform duration-300 lg:static lg:translate-x-0 flex flex-col ${
                         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 >
@@ -246,28 +246,29 @@ export default function DashboardLayout({ children, title = 'Admin Dashboard' })
                                     </svg>
                                 </button>
 
-                                {/* Dropdown Menu */}
+                                {/* Backdrop overlay for clicking outside */}
                                 {profileOpen && (
-                                    <>
-                                        <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 border border-gray-100 ring-1 ring-black ring-opacity-5 z-50">
-                                            <Link
-                                                href={route('profile.edit')}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0A2540]"
-                                                onClick={() => setProfileOpen(false)}
-                                            >
-                                                Profil Saya
-                                            </Link>
-                                            <div className="border-t border-gray-100 my-1"></div>
-                                            <button
-                                                onClick={handleLogout}
-                                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                            >
-                                                Logout
-                                            </button>
-                                        </div>
-                                    </>
+                                    <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
                                 )}
+                                {/* Dropdown Menu */}
+                                <div className={`absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 border border-gray-100 ring-1 ring-black ring-opacity-5 z-50 transition-all duration-200 transform origin-top-right ${
+                                    profileOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+                                }`}>
+                                    <Link
+                                        href={route('profile.edit')}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-navy"
+                                        onClick={() => setProfileOpen(false)}
+                                    >
+                                        Profil Saya
+                                    </Link>
+                                    <div className="border-t border-gray-100 my-1"></div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </header>

@@ -1,3 +1,332 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    background-color: #ffffff;
+    color: #0A2540;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A2540;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.4);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00E5FF;
+}
+
+/* Hero Background & Gradients */
+.bg-hero-gradient {
+  background: linear-gradient(135deg, #0A2540 0%, #06192b 100%);
+}
+
+/* Hero Background — visible grid overlay matching screenshot */
+.bg-hero-gradient.grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-color: #0A2540;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #00E5FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-cyan {
+  background: linear-gradient(135deg, #00E5FF 0%, #4DF0FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Grid & Noise — default grid-bg for non-hero sections */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.06) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.hero-noise {
+  position: relative;
+}
+.hero-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 1;
+}
+
+/* Blobs */
+.blob {
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: float 8s ease-in-out infinite;
+}
+.blob-2 {
+  animation-delay: -3s;
+}
+.blob-3 {
+  animation-delay: -5s;
+}
+
+/* Glow Effects */
+.glow-cyan {
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.25), 0 0 80px rgba(0, 229, 255, 0.1);
+}
+
+.glow-cyan-sm {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+}
+
+.text-glow {
+  text-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+/* Navbar Scrolled State — dark semi-transparent + blur */
+.navbar-scrolled {
+  background: rgba(5, 15, 30, 0.5) !important;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(0, 229, 255, 0.05);
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Trust Badges & Cards */
+.trust-badge {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.trust-badge:hover {
+  transform: translateY(-4px) scale(1.05);
+  filter: brightness(1.2);
+}
+
+.pillar-card {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pillar-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2), 0 0 30px rgba(0, 229, 255, 0.08);
+}
+
+.pricing-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+.pricing-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1.5rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.3), rgba(0, 229, 255, 0));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.pricing-card:hover::before {
+  opacity: 1;
+}
+.pricing-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
+}
+.pricing-card.featured {
+  transform: scale(1.05);
+}
+.pricing-card.featured:hover {
+  transform: scale(1.05) translateY(-12px);
+}
+.pricing-card.featured::before {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.8), rgba(0, 229, 255, 0.2));
+  opacity: 1;
+}
+
+/* Reusable Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #00E5FF, #00b8cc);
+  color: #0A2540;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.btn-primary:hover::after {
+  opacity: 1;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 229, 255, 0.5);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  border: 2px solid rgba(0, 229, 255, 0.4);
+  color: #00E5FF;
+  transition: all 0.3s ease;
+}
+.btn-outline:hover {
+  border-color: #00E5FF;
+  background: rgba(0, 229, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Step Connector */
+.step-connector {
+  border-left: 2px dashed rgba(0, 229, 255, 0.3);
+}
+
+/* Scroll Reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* Infinite Marquee Loop — right-to-left horizontal */
+.marquee-track {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+  will-change: transform;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Diagonal Dividers */
+.diagonal-divider {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+.diagonal-divider-bottom {
+  clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Miscellaneous Badges & Icons */
+.app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.badge-popular {
+  background: linear-gradient(135deg, #00E5FF, #00b8cc);
+  color: #0A2540;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* WhatsApp Floating Button */
+.wa-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  width: 56px;
+  height: 56px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(37, 211, 102, 0.5);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.wa-float:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 40px rgba(37, 211, 102, 0.7);
+}
+
+/* Modal Animations */
+@keyframes modal-backdrop-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-panel-appear {
+  from { opacity: 0; transform: scale(0.95) translateY(16px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-backdrop {
+  animation: modal-backdrop-fade 0.2s ease-out forwards;
+}
+.animate-modal-panel {
+  animation: modal-panel-appear 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+

@@ -75,11 +75,11 @@ export default function Dashboard({ user, stats, subscriptions }) {
                         <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:p-0">
                             {/* Backdrop */}
                             <div
-                                className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
+                                className="fixed inset-0 bg-navy/60 backdrop-blur-sm transition-opacity animate-backdrop"
                                 onClick={() => setCredModal(null)}
                             />
                             {/* Modal Panel */}
-                            <div className="relative inline-block w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all sm:my-8">
+                            <div className="relative inline-block w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all sm:my-8 animate-modal-panel">
                                 <div className="mb-5 flex items-center justify-between border-b border-gray-100 pb-4">
                                     <h3 className="text-lg font-bold text-gray-900">
                                         Kredensial {credModal.name}
@@ -106,7 +106,7 @@ export default function Dashboard({ user, stats, subscriptions }) {
                                                 type="text"
                                                 readOnly
                                                 value={credModal.email ?? '(belum tersedia)'}
-                                                className="block w-full rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm font-medium text-gray-900 focus:border-[#00E5FF] focus:ring-[#00E5FF]"
+                                                className="block w-full rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm font-medium text-gray-900 focus:border-cyan-accent focus:ring-cyan-accent"
                                             />
                                             <button
                                                 onClick={() => copyToClipboard(credModal.email ?? '', 'Email')}
@@ -130,7 +130,7 @@ export default function Dashboard({ user, stats, subscriptions }) {
                                                 type={showPass ? 'text' : 'password'}
                                                 readOnly
                                                 value={credModal.password ?? '(belum tersedia)'}
-                                                className="block w-full rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm font-medium text-gray-900 focus:border-[#00E5FF] focus:ring-[#00E5FF]"
+                                                className="block w-full rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm font-medium text-gray-900 focus:border-cyan-accent focus:ring-cyan-accent"
                                             />
                                             <div className="absolute right-2 top-2 flex items-center gap-1">
                                                 <button
@@ -179,8 +179,8 @@ export default function Dashboard({ user, stats, subscriptions }) {
                 )}
 
                 {/* ── Greeting Banner ───────────────────────────────── */}
-                <div className="relative overflow-hidden rounded-2xl border border-[#0A2540]/50 bg-[#0A2540] p-6 shadow-lg sm:p-10">
-                    <div className="absolute -mr-20 -mt-20 right-0 top-0 h-64 w-64 rounded-full bg-[#00E5FF]/10 blur-3xl" />
+                <div className="relative overflow-hidden rounded-2xl border border-navy/50 bg-navy p-6 shadow-lg sm:p-10">
+                    <div className="absolute -mr-20 -mt-20 right-0 top-0 h-64 w-64 rounded-full bg-cyan-accent/10 blur-3xl" />
                     <div className="absolute bottom-0 right-40 h-40 w-40 rounded-full bg-blue-500/10 blur-2xl" />
 
                     <div className="relative z-10 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
@@ -193,8 +193,8 @@ export default function Dashboard({ user, stats, subscriptions }) {
                             </p>
                         </div>
                         <div className="min-w-[200px] flex items-center gap-4 rounded-xl border border-white/20 bg-white/10 p-4 shadow-inner backdrop-blur-md">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#00E5FF]/20">
-                                <svg className="h-6 w-6 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-accent/20">
+                                <svg className="h-6 w-6 text-cyan-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                 </svg>
                             </div>
@@ -202,7 +202,7 @@ export default function Dashboard({ user, stats, subscriptions }) {
                                 <p className="text-xs font-semibold uppercase tracking-wider text-white/70">Total Poin Anda</p>
                                 <p className="text-2xl font-bold text-white">
                                     {Number(user.points).toLocaleString('id-ID')}
-                                    <span className="ml-2 text-sm font-medium text-[#00E5FF]">Pts</span>
+                                    <span className="ml-2 text-sm font-medium text-cyan-accent">Pts</span>
                                 </p>
                             </div>
                         </div>
@@ -247,7 +247,7 @@ export default function Dashboard({ user, stats, subscriptions }) {
                         {/* ✅ Navigasi internal pakai <Link> Inertia */}
                         <Link
                             href={route('user.langganan')}
-                            className="rounded-lg bg-[#00E5FF]/10 px-4 py-2 text-sm font-semibold text-[#00b8cc] transition-colors hover:bg-[#00E5FF]/20"
+                            className="rounded-lg bg-cyan-accent/10 px-4 py-2 text-sm font-semibold text-cyan-accent transition-colors hover:bg-cyan-accent/20"
                         >
                             Lihat Semua
                         </Link>
@@ -269,7 +269,7 @@ export default function Dashboard({ user, stats, subscriptions }) {
                                     <tr>
                                         <td colSpan={5} className="px-6 py-10 text-center text-gray-400">
                                             Belum ada langganan aktif.{' '}
-                                            <Link href={route('user.katalog')} className="text-[#00E5FF] hover:underline">
+                                            <Link href={route('user.katalog')} className="text-cyan-accent hover:underline">
                                                 Jelajahi Katalog
                                             </Link>
                                         </td>
@@ -333,7 +333,7 @@ export default function Dashboard({ user, stats, subscriptions }) {
                                                     <Link
                                                         href={route('user.katalog.detail', sub.product_slug)}
                                                         title="Perpanjang"
-                                                        className="inline-block rounded-lg p-2 text-gray-400 transition-colors hover:bg-[#00E5FF]/10 hover:text-[#00E5FF]"
+                                                        className="inline-block rounded-lg p-2 text-gray-400 transition-colors hover:bg-cyan-accent/10 hover:text-cyan-accent"
                                                     >
                                                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
