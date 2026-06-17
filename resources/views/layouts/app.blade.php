@@ -243,7 +243,7 @@
                 <!-- Bottom bar -->
                 <div class="border-t border-white/8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p class="text-white/25 text-xs">
-                        © 2024 AksesPro. Semua hak dilindungi. Dibuat dengan ♡ di Indonesia 🇮🇩
+                        © 2026 AksesPro. Semua hak dilindungi. Dibuat dengan ♡ di Indonesia 🇮🇩
                     </p>
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>

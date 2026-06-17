@@ -24,15 +24,16 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex bg-[#0A2540]">
+        <div className="min-h-screen flex bg-gray-50">
             {/* ── Left Panel — Branding ──────────────────────────── */}
-            <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-16 relative overflow-hidden">
-                {/* Decorative blobs */}
-                <div className="absolute top-0 left-0 w-96 h-96 rounded-full bg-[#00E5FF]/10 blur-3xl -translate-x-1/2 -translate-y-1/2" />
-                <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl translate-x-1/2 translate-y-1/2" />
-
+            <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-16 relative overflow-hidden bg-checkered-grid">
                 <div className="relative z-10 text-center">
-                    <img src="/image/mockup.png" alt="AksesPro Preview" className="w-full max-w-md mx-auto drop-shadow-2xl mb-8 transform transition hover:scale-105 duration-500" onError={(e) => { e.target.style.display = 'none'; }} />
+                    <img 
+                        src="/image/mockup.png" 
+                        alt="AksesPro Preview" 
+                        className="w-full max-w-md mx-auto drop-shadow-2xl mb-8 transform transition hover:scale-105 duration-500" 
+                        onError={(e) => { e.target.style.display = 'none'; }} 
+                    />
                     <h1 className="text-4xl font-black text-white mb-4 leading-tight">
                         Akses Premium<br />Harga Mahasiswa
                     </h1>
@@ -43,27 +44,20 @@ export default function Register() {
             </div>
 
             {/* ── Right Panel — Form ─────────────────────────────── */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 bg-white rounded-l-none lg:rounded-l-3xl">
+            <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 bg-white rounded-l-none lg:rounded-l-3xl shadow-2xl">
                 <div className="w-full max-w-md">
                     <Head title="Daftar — AksesPro" />
 
-                    {/* Logo mobile */}
-                    <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
-                        <img src="/Logo.png" alt="AksesPro" className="h-10 w-auto" />
-                        <span className="text-2xl font-black text-[#0A2540]">
-                            Akses<span className="text-[#FFD700]">Pro</span>
-                        </span>
-                    </div>
-
-                    <div className="text-center mb-8">
-                        <div className="hidden lg:flex items-center justify-center gap-2 mb-4">
-                            <img src="/Logo.png" alt="AksesPro Logo" className="h-14" onError={(e) => { e.target.style.display = 'none'; }} />
-                            <span className="text-3xl font-bold text-gray-900 flex items-center">
-                                Akses<span className="text-[#FFD700]">Pro</span>
-                            </span>
-                        </div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Selamat Datang di AksesPro!</h2>
-                        <p className="text-gray-500">Masuk atau daftar untuk mulai berhemat hari ini.</p>
+                    {/* Logo & Title */}
+                    <div className="flex flex-col items-center text-center mb-8">
+                        <img 
+                            src="/Logo.png" 
+                            alt="AksesPro Logo" 
+                            className="h-14 w-auto mb-4" 
+                            onError={(e) => { e.target.style.display = 'none'; }} 
+                        />
+                        <h2 className="text-3xl font-bold text-[#0A2540] mb-2">Selamat Datang di AksesPro!</h2>
+                        <p className="text-gray-500 text-sm">Masuk atau daftar untuk mulai berhemat hari ini.</p>
                     </div>
 
                     {/* Flash messages dari middleware share */}
@@ -74,7 +68,7 @@ export default function Register() {
                     )}
 
                     {/* SSO Buttons */}
-                    <div className="space-y-4 mb-8">
+                    <div className="space-y-4 mb-6">
                         {/* Google SSO */}
                         <a
                             href="/auth/google/redirect"
@@ -95,7 +89,11 @@ export default function Register() {
                             type="button"
                             id="btn-student-toggle"
                             onClick={() => setIsStudentMode(!isStudentMode)}
-                            className={`w-full flex flex-col items-center justify-center gap-1 border rounded-full py-2 px-4 font-semibold transition shadow-sm ${isStudentMode ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 text-blue-600' : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'}`}
+                            className={`w-full flex flex-col items-center justify-center gap-1 border rounded-full py-2.5 px-4 font-semibold transition shadow-sm ${
+                                isStudentMode 
+                                    ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-200 text-blue-600' 
+                                    : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                            }`}
                         >
                             <div className="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={`w-5 h-5 transition-colors ${isStudentMode ? 'text-blue-600' : 'text-gray-700'}`}>
@@ -117,7 +115,7 @@ export default function Register() {
                     <form onSubmit={submit} className="space-y-4">
                         {isStudentMode && (
                             <div className="text-center mb-4">
-                                <p className="text-sm text-gray-600">Masukkan Email Mahasiswa Anda!</p>
+                                <p className="text-sm font-semibold text-gray-700">Masukkan Email Mahasiswa Anda!</p>
                             </div>
                         )}
 
@@ -127,7 +125,7 @@ export default function Register() {
                                 id="name"
                                 name="name"
                                 value={data.name}
-                                className="mt-1 block w-full rounded-lg border-gray-300 focus:border-[#1A3147] focus:ring-[#1A3147] px-4 py-3"
+                                className="mt-1 block w-full rounded-xl border-gray-300 focus:border-[#0A2540] focus:ring-[#0A2540] px-4 py-3"
                                 autoComplete="name"
                                 placeholder="Nama Lengkap"
                                 isFocused={true}
@@ -144,7 +142,7 @@ export default function Register() {
                                 type="email"
                                 name="email"
                                 value={data.email}
-                                className="mt-1 block w-full rounded-lg border-gray-300 focus:border-[#1A3147] focus:ring-[#1A3147] px-4 py-3"
+                                className="mt-1 block w-full rounded-xl border-gray-300 focus:border-[#0A2540] focus:ring-[#0A2540] px-4 py-3"
                                 autoComplete="username"
                                 placeholder={isStudentMode ? 'nama@student.um.ac.id' : 'Masukkan Email'}
                                 onChange={(e) => setData('email', e.target.value)}
@@ -160,7 +158,7 @@ export default function Register() {
                                 type="password"
                                 name="password"
                                 value={data.password}
-                                className="mt-1 block w-full rounded-lg border-gray-300 focus:border-[#1A3147] focus:ring-[#1A3147] px-4 py-3"
+                                className="mt-1 block w-full rounded-xl border-gray-300 focus:border-[#0A2540] focus:ring-[#0A2540] px-4 py-3"
                                 autoComplete="new-password"
                                 placeholder="Password"
                                 onChange={(e) => setData('password', e.target.value)}
@@ -176,7 +174,7 @@ export default function Register() {
                                 type="password"
                                 name="password_confirmation"
                                 value={data.password_confirmation}
-                                className="mt-1 block w-full rounded-lg border-gray-300 focus:border-[#1A3147] focus:ring-[#1A3147] px-4 py-3"
+                                className="mt-1 block w-full rounded-xl border-gray-300 focus:border-[#0A2540] focus:ring-[#0A2540] px-4 py-3"
                                 autoComplete="new-password"
                                 placeholder="Konfirmasi Password"
                                 onChange={(e) => setData('password_confirmation', e.target.value)}
@@ -190,7 +188,7 @@ export default function Register() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full bg-[#1A3147] hover:bg-[#112233] text-white font-semibold rounded-lg py-3 px-4 transition duration-200 disabled:opacity-60"
+                                className="w-full bg-[#0A2540] hover:bg-[#112233] text-white font-bold rounded-xl py-3.5 px-4 transition duration-200 disabled:opacity-60"
                             >
                                 {processing ? 'Memproses...' : isStudentMode ? 'Lanjutkan dengan Akun Mahasiswa' : 'Daftar dengan Email'}
                             </button>
@@ -204,7 +202,7 @@ export default function Register() {
                             )}
                             <p className="text-sm text-gray-600">
                                 Sudah punya akun?{' '}
-                                <Link href={route('login')} className="font-medium text-[#1A3147] hover:underline">
+                                <Link href={route('login')} className="font-semibold text-[#0A2540] hover:underline">
                                     Masuk
                                 </Link>
                             </p>

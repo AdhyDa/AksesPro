@@ -15,15 +15,43 @@ export default function Home({ products = [] }) {
     const { auth } = usePage().props;
     const user = auth?.user;
 
-    // ── State: Mobile menu + Navbar scroll ──────────────────────
+    // ── State: Mobile menu + Navbar scroll + ScrollSpy ──────────
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [activeSection, setActiveSection] = useState('');
 
     // ── Navbar scroll effect ────────────────────────────────────
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // ── ScrollSpy effect ────────────────────────────────────────
+    useEffect(() => {
+        const handleScrollSpy = () => {
+            const sections = ['kenapa-kami', 'produk', 'cara-kerja', 'kontak'];
+            const scrollPosition = window.scrollY + 220;
+
+            for (const sectionId of sections) {
+                const el = document.getElementById(sectionId);
+                if (el) {
+                    const top = el.offsetTop;
+                    const height = el.offsetHeight;
+                    if (scrollPosition >= top && scrollPosition < top + height) {
+                        setActiveSection(sectionId);
+                        return;
+                    }
+                }
+            }
+            if (window.scrollY < 100) {
+                setActiveSection('');
+            }
+        };
+
+        window.addEventListener('scroll', handleScrollSpy, { passive: true });
+        handleScrollSpy();
+        return () => window.removeEventListener('scroll', handleScrollSpy);
     }, []);
 
     // ── IntersectionObserver: reveal animations ─────────────────
@@ -174,10 +202,58 @@ export default function Home({ products = [] }) {
 
                     {/* Desktop Nav Links */}
                     <ul className="hidden lg:flex items-center gap-8">
-                        <li><a href="#kenapa-kami" className="text-white/70 hover:text-cyan-accent text-sm font-medium transition-colors duration-200">Kenapa Kami</a></li>
-                        <li><a href="#produk" className="text-white/70 hover:text-cyan-accent text-sm font-medium transition-colors duration-200">Produk</a></li>
-                        <li><a href="#cara-kerja" className="text-white/70 hover:text-cyan-accent text-sm font-medium transition-colors duration-200">Cara Kerja</a></li>
-                        <li><a href="#kontak" className="text-white/70 hover:text-cyan-accent text-sm font-medium transition-colors duration-200">Kontak</a></li>
+                        <li>
+                            <a
+                                href="#kenapa-kami"
+                                onClick={() => setActiveSection('kenapa-kami')}
+                                className={`text-sm font-medium transition-all duration-200 px-3.5 py-1.5 rounded-full ${
+                                    activeSection === 'kenapa-kami'
+                                        ? 'text-navy bg-cyan-accent font-bold shadow-md shadow-cyan-accent/20 scale-105'
+                                        : 'text-white/70 hover:text-cyan-accent'
+                                }`}
+                            >
+                                Kenapa Kami
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="#produk"
+                                onClick={() => setActiveSection('produk')}
+                                className={`text-sm font-medium transition-all duration-200 px-3.5 py-1.5 rounded-full ${
+                                    activeSection === 'produk'
+                                        ? 'text-navy bg-cyan-accent font-bold shadow-md shadow-cyan-accent/20 scale-105'
+                                        : 'text-white/70 hover:text-cyan-accent'
+                                }`}
+                            >
+                                Produk
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="#cara-kerja"
+                                onClick={() => setActiveSection('cara-kerja')}
+                                className={`text-sm font-medium transition-all duration-200 px-3.5 py-1.5 rounded-full ${
+                                    activeSection === 'cara-kerja'
+                                        ? 'text-navy bg-cyan-accent font-bold shadow-md shadow-cyan-accent/20 scale-105'
+                                        : 'text-white/70 hover:text-cyan-accent'
+                                }`}
+                            >
+                                Cara Kerja
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="#kontak"
+                                onClick={() => setActiveSection('kontak')}
+                                className={`text-sm font-medium transition-all duration-200 px-3.5 py-1.5 rounded-full ${
+                                    activeSection === 'kontak'
+                                        ? 'text-navy bg-cyan-accent font-bold shadow-md shadow-cyan-accent/20 scale-105'
+                                        : 'text-white/70 hover:text-cyan-accent'
+                                }`}
+                            >
+                                Kontak
+                            </a>
+                        </li>
                     </ul>
 
                     {/* CTA & Auth */}
@@ -810,17 +886,17 @@ export default function Home({ products = [] }) {
                                 <li>
                                     <a href="https://api.whatsapp.com/send/?phone=62895396048445" target="_blank" rel="noopener"
                                         className="text-white/45 hover:text-cyan-accent text-sm transition-colors flex items-center gap-2">
-                                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654z" />
+                                        <svg fill="currentColor" className="w-5 h-5" viewBox="0 0 360 362">
+                                            <path fill-rule="evenodd" d="M307.546 52.566C273.709 18.684 228.706.017 180.756 0 81.951 0 1.538 80.404 1.504 179.235c-.017 31.594 8.242 62.432 23.928 89.609L0 361.736l95.024-24.925c26.179 14.285 55.659 21.805 85.655 21.814h.077c98.788 0 179.21-80.413 179.244-179.244.017-47.898-18.608-92.926-52.454-126.807v-.008Zm-126.79 275.788h-.06c-26.73-.008-52.952-7.194-75.831-20.765l-5.44-3.231-56.391 14.791 15.05-54.981-3.542-5.638c-14.912-23.721-22.793-51.139-22.776-79.286.035-82.14 66.867-148.973 149.051-148.973 39.793.017 77.198 15.53 105.328 43.695 28.131 28.157 43.61 65.596 43.593 105.398-.035 82.149-66.867 148.982-148.982 148.982v.008Zm81.719-111.577c-4.478-2.243-26.497-13.073-30.606-14.568-4.108-1.496-7.09-2.243-10.073 2.243-2.982 4.487-11.568 14.577-14.181 17.559-2.613 2.991-5.226 3.361-9.704 1.117-4.477-2.243-18.908-6.97-36.02-22.226-13.313-11.878-22.304-26.54-24.916-31.027-2.613-4.486-.275-6.91 1.959-9.136 2.011-2.011 4.478-5.234 6.721-7.847 2.244-2.613 2.983-4.486 4.478-7.469 1.496-2.991.748-5.603-.369-7.847-1.118-2.243-10.073-24.289-13.812-33.253-3.636-8.732-7.331-7.546-10.073-7.692-2.613-.13-5.595-.155-8.586-.155-2.991 0-7.839 1.118-11.947 5.604-4.108 4.486-15.677 15.324-15.677 37.361s16.047 43.344 18.29 46.335c2.243 2.991 31.585 48.225 76.51 67.632 10.684 4.615 19.029 7.374 25.535 9.437 10.727 3.412 20.49 2.931 28.208 1.779 8.604-1.289 26.498-10.838 30.228-21.298 3.73-10.46 3.73-19.433 2.613-21.298-1.117-1.865-4.108-2.991-8.586-5.234l.008-.017Z" clip-rule="evenodd"/>
                                         </svg>
-                                        WhatsApp Customer Service
+                                        WhatsApp CS
                                     </a>
                                 </li>
                                 <li>
                                     <a href="https://instagram.com/aksespro_id" target="_blank" rel="noopener"
                                         className="text-white/45 hover:text-cyan-accent text-sm transition-colors flex items-center gap-2">
-                                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="currentColor" viewBox="0 0 256 256">
+                                            <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"></path>
                                         </svg>
                                         @aksespro_id
                                     </a>
@@ -838,7 +914,7 @@ export default function Home({ products = [] }) {
                     {/* Bottom bar */}
                     <div className="border-t border-white/[0.08] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p className="text-white/25 text-xs">
-                            © 2024 AksesPro. Semua hak dilindungi. Dibuat dengan ♡ di Indonesia 🇮🇩
+                            © 2026 AksesPro. Semua hak dilindungi. Dibuat dengan ♡ di Indonesia 🇮🇩
                         </p>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
