@@ -143,4 +143,100 @@ class MidtransPaymentTest extends TestCase
         $transaction->refresh();
         $this->assertEquals('pending', $transaction->status);
     }
+
+    public function test_webhook_rejects_mismatched_gross_amount()
+    {
+        $transaction = Transaction::create([
+            'invoice_id' => 'AP-ORDER-TEST789',
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'total_amount' => 20000, // Expected amount is 20000
+            'payment_method' => 'Midtrans Snap',
+            'status' => 'pending',
+        ]);
+
+        $orderId = 'AP-ORDER-TEST789';
+        $statusCode = '200';
+        $grossAmount = '15000'; // Mismatched gross amount from callback
+        $serverKey = 'fake_server_key';
+        
+        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+        $payload = [
+            'signature_key' => $signatureKey,
+            'order_id' => $orderId,
+            'status_code' => $statusCode,
+            'gross_amount' => $grossAmount,
+            'transaction_status' => 'settlement',
+            'fraud_status' => 'accept',
+            'payment_type' => 'qris'
+        ];
+
+        $response = $this->postJson(route('midtrans.callback'), $payload);
+
+        $response->assertStatus(400);
+        $response->assertJson(['message' => 'Gross amount mismatch']);
+
+        // Verify transaction is still pending and not updated
+        $transaction->refresh();
+        $this->assertEquals('pending', $transaction->status);
+
+        // Verify points not added
+        $this->user->refresh();
+        $this->assertEquals(0, $this->user->points);
+    }
+
+    public function test_webhook_rolls_back_on_database_exception()
+    {
+        $transaction = Transaction::create([
+            'invoice_id' => 'AP-ORDER-TEST-FAIL',
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'total_amount' => 20000,
+            'payment_method' => 'Midtrans Snap',
+            'status' => 'pending',
+        ]);
+
+        $orderId = 'AP-ORDER-TEST-FAIL';
+        $statusCode = '200';
+        $grossAmount = '20000';
+        $serverKey = 'fake_server_key';
+        
+        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+        $payload = [
+            'signature_key' => $signatureKey,
+            'order_id' => $orderId,
+            'status_code' => $statusCode,
+            'gross_amount' => $grossAmount,
+            'transaction_status' => 'settlement',
+            'fraud_status' => 'accept',
+            'payment_type' => 'qris'
+        ];
+
+        // Simulate database failure during subscription creation by throwing exception
+        UserSubscription::creating(function ($subscription) {
+            throw new \Exception("Simulated database constraint/connection failure");
+        });
+
+        $response = $this->postJson(route('midtrans.callback'), $payload);
+
+        $response->assertStatus(500);
+        $response->assertJsonStructure(['message', 'error']);
+
+        // Assert Atomicity: Transaction status should remain pending (not updated to success)
+        $transaction->refresh();
+        $this->assertEquals('pending', $transaction->status);
+
+        // Assert Atomicity: User points should remain 0 (not incremented)
+        $this->user->refresh();
+        $this->assertEquals(0, $this->user->points);
+
+        // Assert Atomicity: No user subscription was created in the database
+        $this->assertDatabaseMissing('user_subscriptions', [
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+        ]);
+    }
 }
+
