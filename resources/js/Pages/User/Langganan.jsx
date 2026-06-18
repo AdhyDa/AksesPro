@@ -31,7 +31,7 @@ export default function Langganan({ user, subscriptions }) {
 
     return (
         <UserDashboardLayout user={user} title="Langganan Aktif">
-            <Head title="Langganan Aktif — AksesPro" />
+            <Head title="Langganan Aktif " />
 
             <div className="space-y-6">
                 

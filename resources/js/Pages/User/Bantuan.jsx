@@ -32,7 +32,7 @@ export default function Bantuan({ user }) {
 
     return (
         <UserDashboardLayout user={user} title="Bantuan & Support">
-            <Head title="Bantuan & Support — AksesPro" />
+            <Head title="Bantuan & Support " />
 
             <div className="space-y-8">
                 

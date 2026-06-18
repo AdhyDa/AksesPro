@@ -43,7 +43,7 @@ export default function KatalogDetail({ user, product }) {
 
     return (
         <UserDashboardLayout user={user} title={product.name}>
-            <Head title={`${product.name} — AksesPro`} />
+            <Head title={`${product.name} `} />
 
             <div className="space-y-6">
                 {/* Back Button */}

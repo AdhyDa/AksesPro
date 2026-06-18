@@ -57,7 +57,7 @@ export default function Login({ status, canResetPassword }) {
             {/* ── Right Panel — Form ─────────────────────────────── */}
             <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 bg-white rounded-l-none lg:rounded-l-3xl shadow-2xl">
                 <div className="w-full max-w-md">
-                    <Head title="Masuk — AksesPro" />
+                    <Head title="Masuk" />
 
                     {/* Logo & Title */}
                     <div className="flex flex-col items-center text-center mb-8">

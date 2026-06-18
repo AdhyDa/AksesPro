@@ -281,7 +281,7 @@ export default function Dashboard({
 
     return (
         <DashboardLayout title="Dashboard Overview">
-            <Head title="Dashboard Admin — AksesPro" />
+            <Head title="Dashboard Admin " />
 
             {/* Toast Notification */}
             {showToast && (

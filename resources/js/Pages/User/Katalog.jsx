@@ -11,7 +11,7 @@ export default function Katalog({ user, products, search }) {
 
     return (
         <UserDashboardLayout user={user} title="Katalog Produk">
-            <Head title="Katalog Produk — AksesPro" />
+            <Head title="Katalog Produk " />
 
             <div className="space-y-6">
                 {/* Header Section */}

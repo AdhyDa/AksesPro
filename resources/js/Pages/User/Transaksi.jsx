@@ -25,7 +25,7 @@ export default function Transaksi({ user, transactions }) {
 
     return (
         <UserDashboardLayout user={user} title="Riwayat Transaksi">
-            <Head title="Riwayat Transaksi — AksesPro" />
+            <Head title="Riwayat Transaksi " />
 
             <div className="space-y-6">
                 

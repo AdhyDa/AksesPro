@@ -25,7 +25,7 @@ export default function Poin({ user, products }) {
 
     return (
         <UserDashboardLayout user={user} title="Tukar Poin">
-            <Head title="Tukar Poin — AksesPro" />
+            <Head title="Tukar Poin " />
 
             <div className="space-y-8">
                 
