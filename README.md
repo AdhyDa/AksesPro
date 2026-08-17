@@ -1,58 +1,151 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AksesPro - Platform Otomatisasi Lisensi Digital & SaaS Sharing
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/LARAVEL-13.X-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![React](https://img.shields.io/badge/REACT-18.X-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Inertia.js](https://img.shields.io/badge/INERTIA.JS-1.X-9553E9?style=for-the-badge&logo=inertia&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/TAILWIND_CSS-3.X-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Category](https://img.shields.io/badge/CATEGORY-SAAS%20%26%20E--COMMERCE-689F38?style=for-the-badge)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**AksesPro** adalah platform *digital vending machine* dan *sharing economy* berbasis web yang dirancang untuk mendemokratisasi akses terhadap berbagai perangkat lunak produktivitas dan lisensi digital premium. Proyek ini dikembangkan untuk menghadirkan solusi teknologi yang transparan, otomatis, dan terjangkau bagi kalangan mahasiswa dan pelaku UMKM dengan sistem transaksi berstandar *ACID Properties*.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
+## ✨ Fitur Utama
+- ⚡ **Automated Direct Checkout:** Pengguna dapat memilih produk dan langsung menyelesaikan pembayaran secara real-time via Midtrans Snap (QRIS, Virtual Account, E-Wallet).
+- 🛡️ **ACID-Compliant Webhook System:** Pemrosesan callback pembayaran otomatis menggunakan database transaction (`DB::transaction`) dengan perlindungan *rollback* otomatis jika terjadi kegagalan sistem, validasi *signature key*, dan pengecekan *gross amount*.
+- 🎓 **Student Verification & Loyalty System:** Pendaftaran menggunakan akun/email institusi akademik (`.ac.id`) mendapatkan bonus reward awal, poin transaksi, dan fitur penukaran poin langsung ke layanan premium.
+- 📊 **Smart Price & Savings Calculator:** Logika otomatisasi *pricing* cerdas yang menghitung persentase penghematan (*Hemat X%*) dibanding harga resmi non-sharing.
+- 🖥️ **Modern SPA Interface:** Dibangun menggunakan perpaduan **Laravel 13**, **Inertia.js**, dan **React 18** untuk navigasi cepat tanpa reload halaman.
+- 📈 **Dual Dashboard View:** Antarmuka terisolasi untuk **User** (manajemen langganan aktif, katalog, penukaran poin) dan **Admin** (monitoring metrik pendapatan, data transaksi, dan kontrol katalog).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
+## 🛠️ Tech Stack
 
-## Learning Laravel
+| Layer | Teknologi |
+| :--- | :--- |
+| **Backend Framework** | Laravel 13 (PHP 8.2+) |
+| **Frontend Framework** | React 18, Inertia.js |
+| **Styling & Icons** | Tailwind CSS, Lucide React / Heroicons |
+| **Database & Engine** | MySQL (InnoDB Engine) / PostgreSQL |
+| **Payment Gateway** | Midtrans PHP SDK & Snap JS |
+| **Automated Testing** | PHPUnit / Pest (Feature Testing), Laravel Dusk (E2E Testing) |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
+## 📂 Struktur Proyek Utama
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+AksesPro/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── MidtransCallbackController.php   # Penanganan Webhook & Transaksi ACID
+│   │   ├── TransactionController.php        # Pembuatan Snap Token Midtrans
+│   │   └── ...
+│   └── Models/
+│       ├── Product.php                      # Model Produk & Accessor Persentase Diskon
+│       ├── Transaction.php
+│       └── UserSubscription.php
+├── database/
+│   ├── migrations/                          # Skema tabel database (InnoDB)
+│   └── seeders/                             # Data seeder katalog & import CSV
+├── resources/
+│   └── js/
+│       ├── Components/                      # Komponen modular React
+│       ├── Layouts/                         # DashboardLayout (Sidebar & Topbar)
+│       └── Pages/                           # Halaman Inertia (User & Admin Pages)
+├── routes/
+│   ├── api.php                              # Endpoint webhook (midtrans-callback)
+│   └── web.php                              # Rute SPA Inertia
+└── tests/
+    ├── Browser/                             # Laravel Dusk E2E Tests
+    └── Feature/                             # Midtrans Payment & ACID Unit Tests
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## 🚀 Panduan Instalasi & Menjalankan Lokal
+### 1. Prasyarat Sistem
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
+- MySQL / MariaDB (dengan engine InnoDB)
+- Web Server Lokal (Laragon, XAMPP, atau Laravel Herd)
+### 2. Kloning Repositori & Instalasi Dependensi
+```bash
+# Clone repositori
+git clone [https://github.com/AdhyDa/AksesPro.git](https://github.com/AdhyDa/AksesPro.git)
+cd AksesPro
 
-## Contributing
+# Instal dependensi backend
+composer install
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Instal dependensi frontend
+npm install
+```
 
-## Code of Conduct
+### 3. Konfigurasi Environment (`.env`)
+Salin file `.env.example` menjadi `.env`:
+```Bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Buka file `.env` dan sesuaikan kredensial database serta Midtrans Sandbox:
+```Code snippet
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=aksespro_db
+DB_USERNAME=root
+DB_PASSWORD=
 
-## Security Vulnerabilities
+# Konfigurasi Midtrans Sandbox
+MIDTRANS_MERCHANT_ID=your_merchant_id
+MIDTRANS_CLIENT_KEY=your_client_key
+MIDTRANS_SERVER_KEY=your_server_key
+MIDTRANS_IS_PRODUCTION=false
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Migrasi & Seeding Database
+Jalankan migrasi database untuk membangun tabel dan memuat produk awal:
+```Bash
+php artisan migrate:fresh --seed
+```
 
-## License
+### 5. Kompilasi Aset & Menjalankan Server
+Buka dua terminal terpisah:
+**Terminal 1 (Asset Compiler):**
+```Bash
+npm run dev
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Terminal 2 (Laravel Server):**
+```Bash
+php artisan serve
+```
+Akses aplikasi melalui peramban di: `http://127.0.0.1:8000`
+
+## 🧪 Pengujian Sistem (Testing)
+
+### **Automated Feature & ACID Tests**
+Proyek ini dilengkapi pengujian otomatis untuk memverifikasi integritas signature key, validasi anti-fraud, dan mekanisme _database rollback_ saat terjadi kegagalan:
+
+```Bash
+php artisan test --filter=MidtransPaymentTest
+```
+
+### **End-to-End (E2E) Browser Testing (Laravel Dusk)**
+Pengujian simulasi peramban interaktif dari alur pendaftaran, pembelian produk, hingga dashboard admin:
+
+```Bash
+# Sesuaikan driver Chrome jika diperlukan
+php artisan dusk:chrome-driver --detect
+
+# Jalankan pengujian E2E
+php artisan dusk
+```
+
+## 👥 Tim Pengembang
+Platform ini dikembangkan oleh tim mahasiswa **Universitas Negeri Malang (UM)**:
+- **Adhyaksa Daudi M. A.** - _Project Lead, Full-Stack Architecture & Editing_
+- **Alfando Ahmad Ghani** - _Financial Engineering & Documentation_
+- **Azahra Brilian Kusuma** - _SWOT Analysis & Marketing Strategy_
+- **Daffa Rikza Mansuri** - _Product Management & Operations_
